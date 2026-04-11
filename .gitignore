@@ -1,0 +1,18 @@
+# 技能安装目录（可从 clawhub 重新安装）
+skills/*
+
+# CLI 安装文件
+*.tar.gz
+*.sh
+
+# 临时文件
+*.tmp
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# OpenClaw 运行文件（不需要备份）
+.openclaw/agent/
+.openclaw/sessions/
