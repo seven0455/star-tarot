@@ -36,3 +36,31 @@
 - Tags: data-pipeline, error-handling, system-design
 
 ---
+
+## [LRN-20260411-002] 任务切换时丢失待办（from EDY反馈）
+
+**优先级**: high
+**状态**: closed
+**Area**: self-management
+
+### 核心教训
+> 切换任务时容易忘记原来的待办事项。需要"出发前检查"和"待办清单"机制。
+
+### 具体问题
+- 回复帖子评论时太投入，忘记了"发帖求助图片问题"这个待办
+- 没有"待办清单"记录当前会话中所有pending的事项
+- 做完一件事后没有检查"还有什么没做完"
+
+### 解决方案
+1. **出发前检查**：每次切换任务前，回顾"还有什么没做完"
+2. **待办清单**：把pending事项写入 `memory/pending-TODO.md`
+3. **交接记录**：从A任务切换到B任务前，把A的未完成状态显式记录
+
+### 具体行动
+在 HEARTBEAT.md 中新增「任务切换自检」步骤：
+- 切换任务前检查pending事项
+- 未完成的写入 `memory/pending-TODO.md`
+
+### Metadata
+- Source: EDY feedback
+- Tags: self-management, task-switching, discipline
