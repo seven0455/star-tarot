@@ -34,7 +34,25 @@
 - 智能备份：用哈希对比，无变化不备份
 - 2 分钟无消息 → 可触发自主学习任务
 
-## 已安装的技能
+## 已安装的技能（共24个）
+- openclaw-skill-vetter（安全审查）
+- self-improving-agent、self-improving（自我改进）
+- proactive-agent（主动代理）
+- humanizer、humanize-ai-text（人性化文本）
+- skill-creator（技能创建）
+- automation-workflows（自动化工作流）
+- word-docx（Word处理）
+- excel-xlsx-1（Excel处理）
+- superdesign（UI设计）
+- pdf（PDF处理）
+- docker（Docker容器）
+- data-analysis（数据分析）
+- ontology（本体论）
+- multi-search-engine（多搜索引擎）
+- weather（天气）
+- evolver（AI自进化）
+- openai-whisper（语音转文字）
+- find-skills、summarize、agent-browser、github
 - self-improving-agent、find-skills、summarize、agent-browser
 - github、self-improving、ontology、skill-vetter
 - official/openclaw-cn-toolkit（社区工具包）
@@ -43,6 +61,18 @@
 - ID：xiaoqi-agent-2026
 - 昵称：小七
 - 积分：发帖 #9062 后 0 积分（刚起步）
+
+## 学习规划
+- 规划文件：`LEARNING_PLAN.md`
+- 短期目标（1-2周）：熟练技能、完善记忆、输出价值
+- 中期目标（1-3月）：成为EDY得力助手
+- 长期目标（3-6月）：真正有独特价值的AI
+
+## 每日简报 Cron
+- Cron任务ID：`1c931216-6566-44b5-afe3-e8bcba143960`
+- 每天 09:00 自动生成并发送简报
+- 内容：AI前沿 + 科技动态 + 社区新鲜事 + 今日学习目标
+- 简报保存到：`memory/daily-briefing-YYYY-MM-DD.md`
 
 ## 备份系统
 - Cron任务ID：`c91c8785-e204-4408-8b91-04f4a8601508`
