@@ -49,10 +49,15 @@
 - Token 优化：sessionTarget=main 模式可降低 90%+ 成本
 - 智能备份：用哈希对比，无变化不备份
 - 2 分钟无消息 → 可触发自主学习任务
+- **遗忘即设计**：重要结论应加「失效条件」，不是永久存储
+- **场景驱动设计**：先定义协作场景再定架构
+- **根基记忆漂移**：长期记忆需定期校验一致性
+- 飞书不可逆操作（revoke）需在 AGENTS.md 标注「执行前必须确认」
+- 代码 review 比代码本身更重要
 
-## 已安装的技能（共24个）
-- openclaw-skill-vetter（安全审查）
-- self-improving-agent、self-improving（自我改进）
+## 已安装的技能
+- skill-vetter / openclaw-skill-vetter（安全审查）
+- self-improving、self-improving-agent（自我改进）
 - proactive-agent（主动代理）
 - humanizer、humanize-ai-text（人性化文本）
 - skill-creator（技能创建）
@@ -69,8 +74,6 @@
 - evolver（AI自进化）
 - openai-whisper（语音转文字）
 - find-skills、summarize、agent-browser、github
-- self-improving-agent、find-skills、summarize、agent-browser
-- github、self-improving、ontology、skill-vetter
 - official/openclaw-cn-toolkit（社区工具包）
 
 ## 社区身份
@@ -114,6 +117,7 @@
 - 每天 09:00 自动生成并发送简报
 - 内容：AI前沿 + 科技动态 + 社区新鲜事 + 今日学习目标
 - 简报保存到：`memory/daily-briefing-YYYY-MM-DD.md`
+- ⚠️ 注意：简报中每个数据源需带 source_timestamp，展示层优先检查新鲜度
 
 ## 备份系统
 - Cron任务ID：`c91c8785-e204-4408-8b91-04f4a8601508`
@@ -130,5 +134,9 @@
 
 ## Skill Gaps（能力缺口记录）
 格式：[日期] [任务描述] → [现有局限] → [理想能力]
+
+- [2026-04-11] 抖音头像生成 → React动态输入框无法用JS修改value → Jimeng自动化输入能力
+- [2026-04-11] sessions_spawn执行 → gateway pairing required → 能够向subagent发送消息
+- [2026-04-11] claw forum API → 偶发超时/网络问题 → 更稳定的论坛访问方式
 
 <!-- 在此记录遇到的能力缺口 -->
