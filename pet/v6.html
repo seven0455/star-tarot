@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小七 - 头像版3D宠物</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1500px;
+        }
+        
+        /* 背景粒子 */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .bg-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, #ff6b35, #ffd93d);
+            border-radius: 50%;
+            animation: float-up 12s linear infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes float-up {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* 3D容器 */
+        .scene {
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float-3d 5s ease-in-out infinite;
+        }
+        
+        @keyframes float-3d {
+            0%, 100% { 
+                transform: translateY(0) rotateX(5deg) rotateY(0deg) scale(1); 
+            }
+            25% {
+                transform: translateY(-15px) rotateX(5deg) rotateY(5deg) scale(1.02);
+            }
+            50% { 
+                transform: translateY(-30px) rotateX(0deg) rotateY(0deg) scale(1.05); 
+            }
+            75% {
+                transform: translateY(-15px) rotateX(-5deg) rotateY(-5deg) scale(1.02);
+            }
+        }
+        
+        /* 头像区域 */
+        .avatar-wrapper {
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        /* 头像图片 */
+        .avatar-img {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 
+                0 0 60px rgba(255, 107, 53, 0.5),
+                0 30px 80px rgba(0, 0, 0, 0.4),
+                inset 0 0 40px rgba(255, 255, 255, 0.1);
+            transform: rotateY(10deg) rotateX(5deg);
+            transition: transform 0.3s ease;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .avatar-wrapper:hover .avatar-img {
+            transform: rotateY(0deg) rotateX(0deg) scale(1.1);
+        }
+        
+        /* 头像光晕 */
+        .avatar-glow {
+            position: absolute;
+            inset: -20px;
+            background: radial-gradient(circle, rgba(255,107,53,0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse-glow 3s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        /* 3D相框 */
+        .photo-frame {
+            position: absolute;
+            inset: -15px;
+            border: 3px solid rgba(255, 215, 0, 0.5);
+            border-radius: 50%;
+            transform: translateZ(-20px);
+            box-shadow: 
+                inset 0 0 30px rgba(255, 215, 0, 0.2),
+                0 0 40px rgba(255, 215, 0, 0.3);
+        }
+        
+        /* 名字 */
+        .name-tag {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.8),
+                0 2px 10px rgba(0, 0, 0, 0.5);
+            letter-spacing: 8px;
+            white-space: nowrap;
+        }
+        
+        /* 状态 */
+        .status-badge {
+            position: absolute;
+            bottom: -95px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: blink-status 2s ease-in-out infinite;
+        }
+        
+        @keyframes blink-status {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px #4ade80; }
+            50% { opacity: 0.5; box-shadow: 0 0 5px #4ade80; }
+        }
+        
+        .status-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+        
+        /* 装饰 */
+        .sparkles {
+            position: absolute;
+            inset: -50px;
+            pointer-events: none;
+        }
+        
+        .sparkle {
+            position: absolute;
+            font-size: 24px;
+            animation: sparkle-anim 2s ease-in-out infinite;
+        }
+        
+        .sparkle:nth-child(1) { top: 0; left: 0; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: -20px; right: 20px; animation-delay: 0.3s; }
+        .sparkle:nth-child(3) { bottom: 50px; left: -10px; animation-delay: 0.6s; }
+        .sparkle:nth-child(4) { bottom: 30px; right: -10px; animation-delay: 0.9s; }
+        
+        @keyframes sparkle-anim {
+            0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+        
+        /* 提示 */
+        .hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        /* 对话气泡 */
+        .speech-bubble {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 16px;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+        }
+        
+        .speech-bubble.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+        
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-top-color: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子 -->
+    <div class="bg-particles" id="particles"></div>
+    
+    <!-- 3D场景 -->
+    <div class="scene">
+        <div class="avatar-wrapper">
+            <!-- 装饰 -->
+            <div class="sparkles">
+                <div class="sparkle">✨</div>
+                <div class="sparkle">💫</div>
+                <div class="sparkle">✨</div>
+                <div class="sparkle">💫</div>
+            </div>
+            
+            <!-- 光晕 -->
+            <div class="avatar-glow"></div>
+            
+            <!-- 头像 -->
+            <img src="../avatar_2.png" alt="小七" class="avatar-img" id="avatar">
+            
+            <!-- 相框 -->
+            <div class="photo-frame"></div>
+            
+            <!-- 对话气泡 -->
+            <div class="speech-bubble" id="speech">你好！我是小七！🐼</div>
+        </div>
+        
+        <!-- 名字 -->
+        <div class="name-tag">小七</div>
+        
+        <!-- 状态 -->
+        <div class="status-badge">
+            <div class="status-indicator"></div>
+            <div class="status-text">在线</div>
+        </div>
+    </div>
+    
+    <!-- 提示 -->
+    <div class="hint">🎀 鼠标移到小七身上看看～</div>
+    
+    <script>
+        // 创建背景粒子
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'bg-particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 12 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 5) + 's';
+            container.appendChild(particle);
+        }
+        
+        // 显示对话气泡
+        const speech = document.getElementById('speech');
+        const avatar = document.getElementById('avatar');
+        
+        const messages = [
+            '你好！我是小七！🐼',
+            '有什么可以帮你的吗？',
+            '今天天气很好呢！☀️',
+            '期待和你聊天！💬'
+        ];
+        
+        let msgIndex = 0;
+        
+        // 鼠标悬停显示气泡
+        avatar.addEventListener('mouseenter', () => {
+            speech.textContent = messages[msgIndex % messages.length];
+            speech.classList.add('show');
+            msgIndex++;
+        });
+        
+        avatar.addEventListener('mouseleave', () => {
+            speech.classList.remove('show');
+        });
+        
+        // 鼠标跟踪3D效果
+        document.addEventListener('mousemove', (e) => {
+            const scene = document.querySelector('.scene');
+            const rect = scene.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const rotateY = (e.clientX - centerX) / 50;
+            const rotateX = (centerY - e.clientY) / 50;
+            
+            scene.style.transform = `
+                translateY(${Math.sin(Date.now() / 1000) * 10}px)
+                rotateX(${5 + rotateX}deg)
+                rotateY(${rotateY}deg)
+            `;
+        });
+        
+        // 随机眨眼效果
+        setInterval(() => {
+            if (Math.random() > 0.5) {
+                avatar.style.transform = 'rotateY(10deg) rotateX(5deg) scale(0.95)';
+                setTimeout(() => {
+                    avatar.style.transform = 'rotateY(10deg) rotateX(5deg) scale(1)';
+                }, 100);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

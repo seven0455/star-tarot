@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小七星座馆</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 30%, #0a1a2e 60%, #0a0a1a 100%);
+            background-size: 400% 400%;
+            animation: bgShift 20s ease infinite;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        @keyframes bgShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* 极光层 */
+        .aurora {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 100%, rgba(100, 50, 200, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(50, 150, 200, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 60% at 50% 120%, rgba(150, 100, 200, 0.12) 0%, transparent 50%);
+            animation: auroraMove 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes auroraMove {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-30px) scale(1.05); opacity: 1; }
+        }
+        
+        /* 星空背景 */
+        .stars-bg {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: var(--min-opacity); transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+        
+        /* ========== 星球系统 ========== */
+        .planets-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            perspective: 1000px;
+        }
+        
+        /* 土星 - 带光环 */
+        .saturn {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            top: 15%;
+            right: -60px;
+            animation: planetFloat 25s ease-in-out infinite, planetRotate 40s linear infinite;
+        }
+        
+        .saturn-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e8c99b 0%, #d4a574 30%, #c49a6c 70%, #a67c52 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -20px -10px 40px rgba(0,0,0,0.4),
+                inset 15px 10px 30px rgba(255,255,255,0.2),
+                0 0 60px rgba(232, 201, 155, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .saturn-body::before {
+            content: '';
+            position: absolute;
+            inset: 15%;
+            background: linear-gradient(135deg, transparent 40%, rgba(180,140,100,0.3) 60%);
+            border-radius: 50%;
+        }
+        
+        .saturn-ring {
+            position: absolute;
+            width: 200px;
+            height: 50px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(75deg);
+            border: 8px solid rgba(210, 180, 140, 0.5);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 30px rgba(210, 180, 140, 0.3),
+                inset 0 0 20px rgba(210, 180, 140, 0.2);
+        }
+        
+        .saturn-ring::before {
+            content: '';
+            position: absolute;
+            inset: -15px;
+            border: 4px solid rgba(180, 150, 110, 0.3);
+            border-radius: 50%;
+        }
+        
+        /* 天王星 */
+        .uranus {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: -40px;
+            animation: planetFloat 30s ease-in-out infinite reverse, uranusRotate 25s linear infinite;
+        }
+        
+        .uranus-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 30%, #0ea5e9 70%, #0284c7 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -15px -8px 30px rgba(0,0,0,0.3),
+                inset 10px 8px 20px rgba(255,255,255,0.2),
+                0 0 50px rgba(56, 189, 248, 0.4);
+        }
+        
+        .uranus-body::before {
+            content: '';
+            position: absolute;
+            inset: 20%;
+            background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.15) 70%);
+            border-radius: 50%;
+        }
+        
+        /* 海王星 */
+        .neptune {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            top: 55%;
+            right: -45px;
+            animation: planetFloat 20s ease-in-out infinite, neptuneRotate 30s linear infinite;
+        }
+        
+        .neptune-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 30%, #4f46e5 70%, #4338ca 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -15px -8px 30px rgba(0,0,0,0.4),
+                inset 10px 8px 20px rgba(255,255,255,0.15),
+                0 0 55px rgba(99, 102, 241, 0.5);
+        }
+        
+        .neptune-body::before {
+            content: '';
+            position: absolute;
+            inset: 15%;
+            background: linear-gradient(135deg, transparent 40%, rgba(129, 140, 248, 0.3) 60%);
+            border-radius: 50%;
+        }
+        
+        /* 木星 */
+        .jupiter {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            top: 8%;
+            left: -75px;
+            animation: planetFloat 35s ease-in-out infinite, jupiterRotate 50s linear infinite;
+        }
+        
+        .jupiter-body {
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(180deg, 
+                    #d4a574 0%, #c49a6c 10%,
+                    #e8c99b 15%, #d4a574 20%,
+                    #a67c52 30%, #8b6914 40%,
+                    #d4a574 50%, #c49a6c 55%,
+                    #e8c99b 65%, #d4a574 70%,
+                    #8b6914 85%, #d4a574 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -25px -12px 50px rgba(0,0,0,0.4),
+                inset 15px 12px 40px rgba(255,255,255,0.15),
+                0 0 80px rgba(212, 165, 116, 0.4);
+            position: relative;
+        }
+        
+        /* 木星大红斑 */
+        .jupiter-body::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 18px;
+            background: radial-gradient(ellipse, #dc2626 0%, #b91c1c 70%, transparent 100%);
+            border-radius: 50%;
+            top: 45%;
+            left: 30%;
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+        }
+        
+        .jupiter-body::after {
+            content: '';
+            position: absolute;
+            inset: 18%;
+            background: linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.1) 60%);
+            border-radius: 50%;
+        }
+        
+        /* 火星 */
+        .mars {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            bottom: 35%;
+            right: 5%;
+            animation: planetFloat 18s ease-in-out infinite, marsRotate 20s linear infinite;
+        }
+        
+        .mars-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 40%, #dc2626 70%, #b91c1c 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -8px -4px 15px rgba(0,0,0,0.4),
+                inset 5px 4px 10px rgba(255,255,255,0.2),
+                0 0 35px rgba(239, 68, 68, 0.4);
+        }
+        
+        /* 金星 */
+        .venus {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            top: 40%;
+            left: 3%;
+            animation: planetFloat 22s ease-in-out infinite, venusRotate 35s linear infinite reverse;
+        }
+        
+        .venus-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fde68a 0%, #fbbf24 30%, #f59e0b 60%, #d97706 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -10px -6px 20px rgba(0,0,0,0.3),
+                inset 8px 6px 15px rgba(255,255,255,0.25),
+                0 0 45px rgba(251, 191, 36, 0.5);
+        }
+        
+        /* 地球 */
+        .earth {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            bottom: 12%;
+            right: 15%;
+            animation: planetFloat 28s ease-in-out infinite, earthRotate 22s linear infinite;
+        }
+        
+        .earth-body {
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(135deg, #3b82f6 0%, #2563eb 30%, #1d4ed8 50%, #1e40af 70%, #3b82f6 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -10px -5px 18px rgba(0,0,0,0.4),
+                inset 8px 5px 15px rgba(255,255,255,0.2),
+                0 0 40px rgba(59, 130, 246, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 地球大陆 */
+        .earth-body::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            background: #22c55e;
+            border-radius: 30% 70% 50% 50%;
+            top: 25%;
+            left: 20%;
+            box-shadow: 
+                25px 10px 0 8px #22c55e,
+                10px 20px 0 5px #22c55e;
+        }
+        
+        .earth-body::after {
+            content: '';
+            position: absolute;
+            inset: 15%;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 60%);
+            border-radius: 50%;
+        }
+        
+        /* 动画 */
+        @keyframes planetFloat {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-15px); }
+            75% { transform: translateY(-25px) translateX(5px); }
+        }
+        
+        @keyframes planetRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes uranusRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes neptuneRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes jupiterRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes marsRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes venusRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes earthRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 流星 */
+        .meteor {
+            position: absolute;
+            width: 150px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.9), transparent);
+            animation: meteorShoot var(--meteor-duration) linear infinite;
+            opacity: 0;
+        }
+        
+        .meteor::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -1px;
+            width: 5px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes meteorShoot {
+            0% { transform: translateX(0) translateY(0); opacity: 0; }
+            5% { opacity: 1; }
+            30% { opacity: 0; transform: translateX(400px) translateY(200px); }
+            100% { opacity: 0; }
+        }
+        
+        /* 星云 */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: nebulaFloat 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        .nebula-1 {
+            width: 400px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(120, 50, 180, 0.2) 0%, transparent 70%);
+            top: 10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+        
+        .nebula-2 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(ellipse, rgba(50, 100, 180, 0.15) 0%, transparent 70%);
+            bottom: 10%;
+            right: -5%;
+            animation-delay: -7s;
+        }
+        
+        @keyframes nebulaFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(20px, -20px) scale(1.05); }
+            50% { transform: translate(-10px, 15px) scale(0.95); }
+            75% { transform: translate(15px, 10px) scale(1.02); }
+        }
+        
+        /* 粒子 */
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 10s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* 光环效果 */
+        .glow-ring {
+            position: fixed;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 50%;
+            animation: ringPulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        .glow-ring-1 {
+            width: 300px;
+            height: 300px;
+            top: 20%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+        
+        .glow-ring-2 {
+            width: 200px;
+            height: 200px;
+            bottom: 30%;
+            right: -5%;
+            animation-delay: -3s;
+        }
+        
+        @keyframes ringPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        /* 主容器 */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        /* 标题 */
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title h1 {
+            font-size: 48px;
+            color: #ffd700;
+            text-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.8),
+                0 0 60px rgba(255, 215, 0, 0.5),
+                0 0 100px rgba(255, 215, 0, 0.3);
+            letter-spacing: 15px;
+            margin-bottom: 10px;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.5); }
+            50% { text-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.7), 0 0 120px rgba(255, 215, 0, 0.4); }
+        }
+        
+        .title p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+        
+        /* 头像 */
+        .avatar-wrap {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin-bottom: 25px;
+        }
+        
+        .avatar-ring {
+            position: absolute;
+            inset: -15px;
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            animation: rotateRing 15s linear infinite;
+        }
+        
+        .avatar-ring::before,
+        .avatar-ring::after {
+            content: '✦';
+            position: absolute;
+            color: #ffd700;
+            font-size: 12px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        
+        .avatar-ring::before {
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .avatar-ring::after {
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .avatar-ring-2 {
+            position: absolute;
+            inset: -25px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            animation: rotateRing 25s linear infinite reverse;
+        }
+        
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 215, 0, 0.9);
+            box-shadow: 
+                0 0 50px rgba(255, 215, 0, 0.5),
+                0 0 100px rgba(255, 215, 0, 0.3);
+            animation: avatarPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes avatarPulse {
+            0%, 100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.5), 0 0 100px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 70px rgba(255, 215, 0, 0.7), 0 0 120px rgba(255, 215, 0, 0.4); }
+        }
+        
+        /* 对话容器 */
+        .chat-frame {
+            width: 100%;
+            max-width: 520px;
+            background: linear-gradient(180deg, rgba(20, 15, 40, 0.95) 0%, rgba(10, 10, 30, 0.98) 100%);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 
+                0 0 80px rgba(255, 215, 0, 0.2),
+                0 0 150px rgba(100, 50, 150, 0.1),
+                0 30px 100px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+        
+        /* 头部 */
+        .chat-header {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(200, 150, 100, 0.1) 100%);
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .header-icon {
+            font-size: 32px;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .header-info {
+            flex: 1;
+        }
+        
+        .header-name {
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .header-status {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            border-radius: 50%;
+            animation: statusPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        /* 消息区域 */
+        .chat-messages {
+            height: 380px;
+            overflow-y: auto;
+            padding: 20px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: radial-gradient(ellipse at top, rgba(30, 20, 60, 0.5) 0%, transparent 70%);
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.2));
+            border-radius: 3px;
+        }
+        
+        /* 消息气泡 */
+        .message {
+            max-width: 85%;
+            padding: 14px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.9);
+            animation: msgFadeIn 0.4s ease;
+        }
+        
+        @keyframes msgFadeIn {
+            from { opacity: 0; transform: translateY(15px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .message.bot {
+            align-self: flex-start;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(180, 150, 100, 0.08) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(80, 180, 255, 0.15) 0%, rgba(60, 150, 220, 0.1) 100%);
+            border: 1px solid rgba(80, 180, 255, 0.3);
+            border-bottom-right-radius: 6px;
+        }
+        
+        /* 打字指示器 */
+        .typing {
+            display: none;
+            align-self: flex-start;
+            padding: 14px 20px;
+            background: rgba(255, 215, 0, 0.08);
+            border-radius: 20px;
+            border-bottom-left-radius: 6px;
+        }
+        
+        .typing.show {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #ffd700, #ffb700);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        /* 输入区域 */
+        .chat-input-area {
+            padding: 18px 25px;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 15px 25px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.06);
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+        
+        .chat-input:focus {
+            border-color: rgba(255, 215, 0, 0.8);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+        
+        .send-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffb700 50%, #ff9500 100%);
+            color: #1a0a2e;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(255, 215, 0, 0.5);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 底部提示 */
+        .hint {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 13px;
+            margin-top: 20px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 极光 -->
+    <div class="aurora"></div>
+    
+    <!-- 星云 -->
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+    
+    <!-- 光环 -->
+    <div class="glow-ring glow-ring-1"></div>
+    <div class="glow-ring glow-ring-2"></div>
+    
+    <!-- 星空 -->
+    <div class="stars-bg" id="stars"></div>
+    
+    <!-- 星球 -->
+    <div class="planets-container">
+        <!-- 土星 -->
+        <div class="saturn">
+            <div class="saturn-ring"></div>
+            <div class="saturn-body"></div>
+        </div>
+        
+        <!-- 天王星 -->
+        <div class="uranus">
+            <div class="uranus-body"></div>
+        </div>
+        
+        <!-- 海王星 -->
+        <div class="neptune">
+            <div class="neptune-body"></div>
+        </div>
+        
+        <!-- 木星 -->
+        <div class="jupiter">
+            <div class="jupiter-body"></div>
+        </div>
+        
+        <!-- 火星 -->
+        <div class="mars">
+            <div class="mars-body"></div>
+        </div>
+        
+        <!-- 金星 -->
+        <div class="venus">
+            <div class="venus-body"></div>
+        </div>
+        
+        <!-- 地球 -->
+        <div class="earth">
+            <div class="earth-body"></div>
+        </div>
+    </div>
+    
+    <!-- 流星 -->
+    <div class="meteor" style="top: 5%; left: 30%; --meteor-duration: 4s; animation-delay: 0s;"></div>
+    <div class="meteor" style="top: 15%; left: 60%; --meteor-duration: 5s; animation-delay: 1.5s;"></div>
+    <div class="meteor" style="top: 25%; left: 15%; --meteor-duration: 4.5s; animation-delay: 3s;"></div>
+    <div class="meteor" style="top: 35%; left: 70%; --meteor-duration: 5.5s; animation-delay: 0.5s;"></div>
+    <div class="meteor" style="top: 10%; left: 45%; --meteor-duration: 4s; animation-delay: 2s;"></div>
+    
+    <!-- 粒子 -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <div class="title">
+            <h1>✧ 小七星座馆 ✧</h1>
+            <p>Explore the Mysteries of the Stars</p>
+        </div>
+        
+        <div class="avatar-wrap">
+            <div class="avatar-ring"></div>
+            <div class="avatar-ring-2"></div>
+            <img src="avatar_2.png" alt="小七" class="avatar-img">
+        </div>
+        
+        <div class="chat-frame">
+            <div class="chat-header">
+                <span class="header-icon">🔮</span>
+                <div class="header-info">
+                    <div class="header-name">星座占卜师 小七</div>
+                    <div class="header-status">
+                        <span class="status-dot"></span>
+                        <span>星象能量充盈中</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot">
+                    ✨ 欢迎来到小七星座馆！🌟<br><br>
+                    我是你们的星座占卜师～在这里，你可以探索十二星座的神秘运势<br><br>
+                    💫 试试这样问我：<br>
+                    • "白羊座今日运势"<br>
+                    • "狮子座的爱情如何"<br>
+                    • "我的上升星座是什么"
+                </div>
+            </div>
+            
+            <div class="typing" id="typing">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="诉说你的星座..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" id="send-btn" onclick="sendMessage()">询问</button>
+            </div>
+        </div>
+        
+        <div class="hint">✧ 星辰指引着你 ✧</div>
+    </div>
+    
+    <script>
+        // 创建星空
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.width = (Math.random() * 2.5 + 0.5) + 'px';
+            star.style.height = star.style.width;
+            star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            star.style.setProperty('--min-opacity', Math.random() * 0.4 + 0.2);
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+        
+        // 创建粒子
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (Math.random() * 8 + 6) + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typing = document.getElementById('typing');
+        
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            chatInput.value = '';
+            sendBtn.disabled = true;
+            
+            showTyping();
+            
+            try {
+                // 使用相对路径，自动适配外网和本地
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'message=' + encodeURIComponent(text)
+                });
+                
+                const data = await response.json();
+                hideTyping();
+                addMessage(data.reply || '小七没回复呢...', 'bot');
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('抱歉，连接失败了: ' + error.message, 'bot');
+            }
+            
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+        
+        function addMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = 'message ' + type;
+            msg.innerHTML = simpleMarkdown(text);
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function simpleMarkdown(text) {
+            text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+        
+        function showTyping() {
+            typing.classList.add('show');
+        }
+        
+        function hideTyping() {
+            typing.classList.remove('show');
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        chatInput.focus();
+    </script>
+</body>
+</html>

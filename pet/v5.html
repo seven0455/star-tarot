@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小七 - 3D女孩桌面宠物</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ffe4ec 0%, #ffc1d1 50%, #ffa8c5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+        
+        /* 3D场景 */
+        .scene {
+            position: relative;
+            width: 350px;
+            height: 400px;
+            transform-style: preserve-3d;
+            animation: float-up 4s ease-in-out infinite;
+        }
+        
+        @keyframes float-up {
+            0%, 100% { transform: translateY(0) rotateX(5deg) rotateY(0deg); }
+            50% { transform: translateY(-25px) rotateX(5deg) rotateY(5deg); }
+        }
+        
+        /* 3D女孩身体 */
+        .girl {
+            position: absolute;
+            width: 200px;
+            height: 280px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+        }
+        
+        /* 头部 - 更大更圆 */
+        .head {
+            width: 140px;
+            height: 150px;
+            background: linear-gradient(180deg, #fff5f5 0%, #ffe4ec 50%, #ffd1dc 100%);
+            border-radius: 50% 50% 45% 45%;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 
+                inset -15px -15px 40px rgba(255,182,193,0.3),
+                inset 10px 10px 30px rgba(255,255,255,0.8),
+                0 10px 30px rgba(255,107,138,0.2);
+            z-index: 10;
+        }
+        
+        /* 头发 - 长头发 */
+        .hair-back {
+            position: absolute;
+            width: 160px;
+            height: 200px;
+            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+            border-radius: 80px 80px 60px 60px;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+        
+        .hair-side-left,
+        .hair-side-right {
+            position: absolute;
+            width: 40px;
+            height: 180px;
+            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+            top: 40px;
+            z-index: 5;
+            border-radius: 0 0 50% 50%;
+        }
+        
+        .hair-side-left {
+            left: 5px;
+            animation: swing-hair 3s ease-in-out infinite;
+            transform-origin: top center;
+        }
+        
+        .hair-side-right {
+            right: 5px;
+            animation: swing-hair 3s ease-in-out infinite;
+            animation-delay: 0.15s;
+            transform-origin: top center;
+        }
+        
+        @keyframes swing-hair {
+            0%, 100% { transform: rotate(-8deg) translateX(-5px); }
+            50% { transform: rotate(8deg) translateX(5px); }
+        }
+        
+        /* 刘海 */
+        .bangs {
+            position: absolute;
+            width: 120px;
+            height: 50px;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+        }
+        
+        .bang {
+            position: absolute;
+            height: 45px;
+            background: #2d2d2d;
+            border-radius: 0 0 50% 50%;
+        }
+        
+        .bang:nth-child(1) { width: 35px; left: 5px; transform: rotate(-10deg); }
+        .bang:nth-child(2) { width: 40px; left: 35px; }
+        .bang:nth-child(3) { width: 35px; right: 5px; transform: rotate(10deg); }
+        
+        /* 蝴蝶结 */
+        .bow {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+        }
+        
+        .bow-center {
+            width: 18px;
+            height: 18px;
+            background: #ff6b8a;
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .bow-wing {
+            position: absolute;
+            width: 35px;
+            height: 25px;
+            background: linear-gradient(135deg, #ff8fab 0%, #ff6b8a 100%);
+            border-radius: 50% 50% 50% 50%;
+            top: -3px;
+        }
+        
+        .bow-wing.left { 
+            right: 12px; 
+            transform: rotate(-30deg); 
+        }
+        .bow-wing.right { 
+            left: 12px; 
+            transform: rotate(30deg); 
+        }
+        
+        /* 大眼睛 */
+        .eyes-container {
+            position: absolute;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
+            z-index: 15;
+        }
+        
+        .big-eye {
+            width: 38px;
+            height: 45px;
+            background: linear-gradient(180deg, #2d2d2d 0%, #4a4a4a 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* 睫毛 */
+        .lashes {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px;
+            height: 15px;
+        }
+        
+        .lash {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            transform-origin: bottom center;
+        }
+        
+        .lash:nth-child(1) { left: 5px; transform: rotate(-40deg); }
+        .lash:nth-child(2) { left: 12px; transform: rotate(-20deg); }
+        .lash:nth-child(3) { left: 20px; transform: rotate(0deg); }
+        .lash:nth-child(4) { left: 28px; transform: rotate(20deg); }
+        .lash:nth-child(5) { left: 36px; transform: rotate(40deg); }
+        
+        /* 眼球反光 */
+        .eye-highlight {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+        
+        .eye-highlight-small {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            top: 10px;
+            right: 8px;
+            opacity: 0.7;
+        }
+        
+        /* 粉色腮红 */
+        .blush-cheeks {
+            position: absolute;
+            top: 95px;
+            display: flex;
+            gap: 60px;
+            z-index: 15;
+        }
+        
+        .cheek {
+            width: 22px;
+            height: 14px;
+            background: radial-gradient(ellipse, rgba(255,150,150,0.8) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        /* 小嘴巴 */
+        .small-mouth {
+            position: absolute;
+            top: 115px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 8px;
+            background: #ff6b8a;
+            border-radius: 0 0 50% 50%;
+            z-index: 15;
+        }
+        
+        /* 耳机 - 粉色的 */
+        .headphones-3d {
+            position: absolute;
+            width: 150px;
+            height: 55px;
+            border: 10px solid #ff6b8a;
+            border-radius: 50%;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom: none;
+            z-index: 20;
+            box-shadow: 0 5px 20px rgba(255,107,138,0.4);
+        }
+        
+        .headphones-3d::before,
+        .headphones-3d::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 35px;
+            background: linear-gradient(135deg, #ff6b8a 0%, #ff8fab 100%);
+            border-radius: 10px;
+            top: 0px;
+            box-shadow: 0 3px 10px rgba(255,107,138,0.3);
+        }
+        
+        .headphones-3d::before { left: -20px; }
+        .headphones-3d::after { right: -20px; }
+        
+        /* 身体 - 粉色卫衣 */
+        .body {
+            position: absolute;
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(180deg, #ff9aaf 0%, #ff7b8a 100%);
+            border-radius: 60px 60px 40px 40px;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8;
+            box-shadow: 0 10px 30px rgba(255,107,138,0.3);
+        }
+        
+        /* 卫衣帽子 */
+        .hoodie-back {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(180deg, #ff8fab 0%, #ff7b8a 100%);
+            border-radius: 40px 40px 0 0;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+        }
+        
+        /* 腿 */
+        .legs {
+            position: absolute;
+            display: flex;
+            gap: 15px;
+            top: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 7;
+        }
+        
+        .leg {
+            width: 35px;
+            height: 60px;
+            background: linear-gradient(180deg, #ffd1dc 0%, #ffb6c1 100%);
+            border-radius: 20px 20px 25px 25px;
+        }
+        
+        /* 名字 */
+        .name-3d {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6b8a;
+            text-shadow: 
+                0 2px 10px rgba(255,107,138,0.5),
+                0 0 30px rgba(255,107,138,0.3);
+            letter-spacing: 10px;
+        }
+        
+        /* 状态 */
+        .status-3d {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ff6b8a;
+            font-size: 14px;
+        }
+        
+        .status-dot-3d {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #4ade80; }
+            50% { box-shadow: 0 0 15px #4ade80, 0 0 25px #4ade80; }
+        }
+        
+        /* 装饰星星 */
+        .star-decor {
+            position: absolute;
+            font-size: 20px;
+            color: #ffd1dc;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        .star-decor:nth-child(1) { top: 50px; left: -30px; animation-delay: 0s; }
+        .star-decor:nth-child(2) { top: 100px; right: -25px; animation-delay: 0.5s; }
+        .star-decor:nth-child(3) { bottom: 80px; left: -20px; animation-delay: 1s; }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.5; transform: scale(1) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
+        }
+        
+        /* 提示 */
+        .hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff6b8a;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(255,107,138,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <!-- 装饰星星 -->
+        <div class="star-decor">✨</div>
+        <div class="star-decor">💕</div>
+        <div class="star-decor">✨</div>
+        
+        <div class="girl">
+            <!-- 头发后面 -->
+            <div class="hair-back"></div>
+            <div class="hair-side-left"></div>
+            <div class="hair-side-right"></div>
+            
+            <!-- 头部 -->
+            <div class="head">
+                <!-- 蝴蝶结 -->
+                <div class="bow">
+                    <div class="bow-wing left"></div>
+                    <div class="bow-center"></div>
+                    <div class="bow-wing right"></div>
+                </div>
+                
+                <!-- 刘海 -->
+                <div class="bangs">
+                    <div class="bang"></div>
+                    <div class="bang"></div>
+                    <div class="bang"></div>
+                </div>
+                
+                <!-- 眼睛 -->
+                <div class="eyes-container">
+                    <div class="big-eye">
+                        <div class="lashes">
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                        </div>
+                        <div class="eye-highlight"></div>
+                        <div class="eye-highlight-small"></div>
+                    </div>
+                    <div class="big-eye">
+                        <div class="lashes">
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                            <div class="lash"></div>
+                        </div>
+                        <div class="eye-highlight"></div>
+                        <div class="eye-highlight-small"></div>
+                    </div>
+                </div>
+                
+                <!-- 腮红 -->
+                <div class="blush-cheeks">
+                    <div class="cheek"></div>
+                    <div class="cheek"></div>
+                </div>
+                
+                <!-- 嘴巴 -->
+                <div class="small-mouth"></div>
+            </div>
+            
+            <!-- 耳机 -->
+            <div class="headphones-3d"></div>
+            
+            <!-- 身体 -->
+            <div class="body">
+                <div class="hoodie-back"></div>
+            </div>
+            
+            <!-- 腿 -->
+            <div class="legs">
+                <div class="leg"></div>
+                <div class="leg"></div>
+            </div>
+        </div>
+        
+        <div class="name-3d">小七</div>
+        <div class="status-3d">
+            <div class="status-dot-3d"></div>
+            <span>在线</span>
+        </div>
+    </div>
+    
+    <div class="hint">🎀 小七在等你哦～</div>
+    
+    <script>
+        // 鼠标跟踪眼睛
+        document.addEventListener('mousemove', (e) => {
+            const eyes = document.querySelectorAll('.big-eye');
+            const rect = document.querySelector('.head').getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const deltaX = (e.clientX - centerX) / 30;
+            const deltaY = (e.clientY - centerY) / 30;
+            
+            // 限制移动范围
+            const limitedX = Math.max(-5, Math.min(5, deltaX));
+            const limitedY = Math.max(-3, Math.min(3, deltaY));
+            
+            eyes.forEach(eye => {
+                eye.style.transform = `translate(${limitedX}px, ${limitedY}px)`;
+            });
+        });
+        
+        // 随机眨眼
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                document.querySelectorAll('.big-eye').forEach(eye => {
+                    eye.style.transform = 'scaleY(0.1)';
+                    setTimeout(() => {
+                        eye.style.transform = 'scaleY(1)';
+                    }, 150);
+                });
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

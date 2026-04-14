@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小七 - 3D桌面宠物</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        /* 背景星空 */
+        .stars {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+        }
+        
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        /* 3D场景容器 */
+        .scene {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float-3d 4s ease-in-out infinite;
+        }
+        
+        @keyframes float-3d {
+            0%, 100% { transform: translateY(0) rotateX(5deg); }
+            50% { transform: translateY(-20px) rotateX(5deg); }
+        }
+        
+        /* 3D球体 */
+        .sphere {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, 
+                #ffd1dc 0%, 
+                #ffb6c1 30%, 
+                #ff9aaf 60%, 
+                #ff7b8a 100%);
+            box-shadow: 
+                inset -30px -30px 60px rgba(0,0,0,0.2),
+                inset 20px 20px 40px rgba(255,255,255,0.3),
+                0 30px 60px rgba(255,107,138,0.4);
+            transform-style: preserve-3d;
+        }
+        
+        /* 高光 */
+        .sphere::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            top: 25px;
+            left: 30px;
+            filter: blur(10px);
+        }
+        
+        /* 反光 */
+        .sphere::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            bottom: 50px;
+            right: 40px;
+            filter: blur(5px);
+        }
+        
+        /* 阴影 */
+        .shadow {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: shadow-pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes shadow-pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.6; }
+            50% { transform: translateX(-50%) scale(0.8); opacity: 0.4; }
+        }
+        
+        /* 头发 - 3D效果 */
+        .hair {
+            position: absolute;
+            width: 180px;
+            height: 100px;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .hair-top {
+            width: 140px;
+            height: 80px;
+            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+            border-radius: 70px 70px 0 0;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .hair-side {
+            position: absolute;
+            width: 30px;
+            height: 80px;
+            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+            top: 20px;
+            border-radius: 0 0 50% 50%;
+        }
+        
+        .hair-side.left { left: 10px; }
+        .hair-side.right { right: 10px; }
+        
+        /* 双马尾 */
+        .twins {
+            position: absolute;
+            width: 100%;
+            top: 20px;
+        }
+        
+        .twins::before,
+        .twins::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 100px;
+            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+            border-radius: 0 0 50% 50%;
+            animation: swing-3d 2s ease-in-out infinite;
+            transform-origin: top center;
+        }
+        
+        .twins::before { left: 20px; }
+        .twins::after { right: 20px; animation-delay: 0.1s; }
+        
+        @keyframes swing-3d {
+            0%, 100% { transform: rotate(-10deg) scaleZ(0); }
+            50% { transform: rotate(10deg) scaleZ(0); }
+        }
+        
+        /* 眼睛 */
+        .eyes {
+            position: absolute;
+            display: flex;
+            gap: 40px;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
+        .eye-3d {
+            width: 35px;
+            height: 40px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 50%;
+            position: relative;
+            animation: look 5s ease-in-out infinite;
+        }
+        
+        .eye-3d::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+        
+        .eye-3d::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            top: 10px;
+            right: 10px;
+            opacity: 0.6;
+        }
+        
+        @keyframes look {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(3px); }
+            75% { transform: translateX(-3px); }
+        }
+        
+        /* 腮红 */
+        .blush-3d {
+            position: absolute;
+            width: 25px;
+            height: 15px;
+            background: radial-gradient(ellipse, rgba(255,150,150,0.7) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 100px;
+        }
+        
+        .blush-3d.left { left: 35px; }
+        .blush-3d.right { right: 35px; }
+        
+        /* 嘴巴 */
+        .mouth-3d {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background: #ff6b8a;
+            border-radius: 0 0 50% 50%;
+            top: 125px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* 耳机 */
+        .headphones-3d {
+            position: absolute;
+            width: 170px;
+            height: 60px;
+            border: 8px solid #ff6b35;
+            border-radius: 50%;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom: none;
+            box-shadow: 0 5px 15px rgba(255,107,53,0.3);
+        }
+        
+        .headphones-3d::before,
+        .headphones-3d::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 30px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+            border-radius: 8px;
+            top: 5px;
+        }
+        
+        .headphones-3d::before { left: -15px; }
+        .headphones-3d::after { right: -15px; }
+        
+        /* 名字 */
+        .name-3d {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 30px rgba(255,107,138,0.8);
+            letter-spacing: 8px;
+        }
+        
+        /* 状态 */
+        .status-3d {
+            position: absolute;
+            bottom: -90px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        .status-dot-3d {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse-3d 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-3d {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+        }
+        
+        /* 提示 */
+        .hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        /* 3D粒子 */
+        .particles-3d {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+        
+        .particle-3d {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            animation: float-particle 8s linear infinite;
+        }
+        
+        @keyframes float-particle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="particles-3d" id="particles"></div>
+    
+    <div class="scene">
+        <div class="sphere">
+            <div class="hair">
+                <div class="hair-top"></div>
+                <div class="hair-side left"></div>
+                <div class="hair-side right"></div>
+                <div class="twins"></div>
+            </div>
+            <div class="headphones-3d"></div>
+            <div class="eyes">
+                <div class="eye-3d"></div>
+                <div class="eye-3d"></div>
+            </div>
+            <div class="blush-3d left"></div>
+            <div class="blush-3d right"></div>
+            <div class="mouth-3d"></div>
+        </div>
+        <div class="shadow"></div>
+        <div class="name-3d">小七</div>
+        <div class="status-3d">
+            <div class="status-dot-3d"></div>
+            <span>在线</span>
+        </div>
+    </div>
+    
+    <div class="hint">🐼 小七悬浮在星空中～</div>
+    
+    <script>
+        // 创建星空背景
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 2) + 's';
+            starsContainer.appendChild(star);
+        }
+        
+        // 创建漂浮粒子
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle-3d';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // 鼠标跟踪效果
+        document.addEventListener('mousemove', (e) => {
+            const eyes = document.querySelectorAll('.eye-3d');
+            const rect = document.querySelector('.sphere').getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const deltaX = (e.clientX - centerX) / 50;
+            const deltaY = (e.clientY - centerY) / 50;
+            
+            eyes.forEach(eye => {
+                eye.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

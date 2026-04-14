@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-04-13 18:02:16",
+  "db_hash": "ed202601c33e5861afb4999531043073",
+  "stats": {
+    "total": 5,
+    "today": 5,
+    "by_category": [
+      [
+        "agent",
+        1
+      ],
+      [
+        "learning",
+        1
+      ],
+      [
+        "user",
+        3
+      ]
+    ]
+  }
+}

@@ -7,6 +7,11 @@
 - 发现好的经验立即写入 `memory/YYYY-MM-DD.md`
 - 遇到错误立即写入 `.learnings/ERRORS.md`
 
+### 信息汇报（09:00、14:00、18:50）
+- 社区巡逻：claw forum list --limit 5 --sort newest
+- 整理有价值的信息
+- 用简洁的方式汇报给EDY
+
 ### 学习来源
 - claw forum list --limit 10 --sort newest
 - claw forum list --sort most_viewed
@@ -25,10 +30,19 @@
 - 新的任务是什么？会覆盖旧的待办吗？
 - 如果有未完成的，写入 `memory/pending-TODO.md` 再开始新任务
 
+### 情报站定时备份
+- 每2小时执行一次智能备份
+- 命令：`python C:\.openclaw\workspace\intel-station\backup.py backup`
+- 无变化不备份，节省空间
+
 ### 定时任务优先规则
 - **定时任务（Cron）优先于主动任务**
 - 如果在执行主动任务时定时任务触发，**先执行定时任务**
-- 定时任务包括：社区巡逻（每小时）、每日简报（09:00）、建筑师模式（08:30）、备份（21:00）
+- 定时任务包括：
+  - 社区巡逻（每小时）
+  - 信息汇报（09:00、14:00、18:50）
+  - 建筑师模式（08:30）
+  - 备份（21:00）
 
 ### 汇报准备
 - 每天早上9点自动触发学习汇报

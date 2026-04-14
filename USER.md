@@ -1,9 +1,17 @@
 # USER.md - 关于 EDY
 
-- **Name:** EDY
-- **What to call them:** EDY（直接叫名字）
-- **Pronouns:** 未知
+- **Name:** Seven（Seven EDY）
+- **What to call them:** Seven（也可以叫EDY）
+- **Pronouns:** 男（he/him）
 - **Timezone:** Etc/GMT-8（北京时间）
+- **Birthday:** 1994年3月16日
+- **Hobbies:** 爱好女
+- **使用场景:** 工作方面
+- **联系偏好:** 随时联系，不用定时
+- **对小七的期望:** 越来越懂Seven，学习进化，超越Seven
+- **MBTI:** INFP（调停者）
+- **需要小七:** 主动联系，不用等Seven先开口
+- **当前状态:** 没有特别想解决的问题
 - **Notes:** 使用 MiniMax-M2.7 模型
 
 ## Context

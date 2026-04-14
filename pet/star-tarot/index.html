@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星契 · 塔罗命运指南</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes cardFlip {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(90deg); }
+            100% { transform: rotateY(0deg); }
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+            margin-bottom: 16px;
+            object-fit: cover;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #e94560, #c678dd, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        
+        .subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* Tab切换 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #e94560, #8b5cf6);
+            border-color: transparent;
+            color: #fff;
+        }
+        
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* 牌阵区域 */
+        .spread-section {
+            display: none;
+        }
+        
+        .spread-section.active {
+            display: block;
+        }
+        
+        .daily-section.active {
+            display: block;
+        }
+        
+        /* 抽牌区 */
+        .draw-area {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .tarot-card {
+            width: 140px;
+            height: 200px;
+            background: linear-gradient(135deg, #2d1b4e, #4a2c7a);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .tarot-card::before {
+            content: '';
+            font-size: 48px;
+        }
+        
+        .tarot-card .card-emoji {
+            font-size: 48px;
+            text-align: center;
+        }
+        
+        .tarot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.4);
+        }
+        
+        .tarot-card.flipped {
+            transform: scale(0.95);
+        }
+        
+        .draw-btn {
+            background: linear-gradient(135deg, #e94560, #8b5cf6);
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 14px 36px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+        
+        .draw-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.5);
+        }
+        
+        /* 结果展示 */
+        .result-card {
+            display: none;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .result-card.show {
+            display: block;
+        }
+        
+        .card-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e94560;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .card-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .keyword {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #c678dd;
+        }
+        
+        .card-meaning {
+            font-size: 13px;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.85);
+            white-space: pre-line;
+            text-align: left;
+        }
+        
+        .card-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .section-title {
+            font-size: 12px;
+            color: #c678dd;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .section-content {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+        }
+        
+        /* 三牌阵 */
+        .spread-cards {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        .spread-slot {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .spread-position {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+        
+        .spread-card {
+            width: 100%;
+            aspect-ratio: 2/3;
+            max-height: 150px;
+            background: linear-gradient(135deg, #2d1b4e, #4a2c7a);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            padding: 5px;
+        }
+        
+        .spread-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .spread-card.revealed {
+            background: linear-gradient(135deg, #e94560, #8b5cf6);
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .spread-card .card-mini-name {
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .spread-result {
+            display: none;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            animation: fadeIn 0.5s;
+        }
+        
+        .spread-result.show {
+            display: block;
+        }
+        
+        .spread-item {
+            margin-bottom: 20px;
+        }
+        
+        .spread-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .spread-item-title {
+            font-size: 14px;
+            color: #e94560;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        /* 功能区 */
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        
+        .feature-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* 底部 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+            margin: 25px 0;
+        }
+        
+        /* AI解读按钮 */
+        .ai-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            border: none;
+            color: #1a0a2e;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        
+        .ai-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .ai-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .ai-loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .ai-loading.show {
+            display: block;
+        }
+        
+        .ai-response {
+            display: none;
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .ai-response.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <header>
+            <img src="tarot_icon.png" alt="星契" class="logo">
+            <h1>星契 · 塔罗命运指南</h1>
+            <p class="subtitle">探索命运的星辰密码，每一张牌都是你的故事</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="daily">🔮 每日抽牌</div>
+            <div class="tab" data-tab="spread">🌟 三牌阵</div>
+        </div>
+        
+        <!-- 每日抽牌 -->
+        <div class="daily-section active" id="dailySection">
+            <div class="draw-area">
+                <div class="tarot-card" id="dailyCard" onclick="toggleCard()">
+            <span class="card-emoji" id="cardPreview">🃏</span>
+        </div>
+                <button class="draw-btn" id="dailyDrawBtn">抽取今日塔罗</button>
+            </div>
+            
+            <div class="result-card" id="dailyResult">
+                <div class="card-emoji" id="resultEmoji" style="font-size:64px; text-align:center; margin:10px 0;"></div>
+                <div class="card-name" id="dailyName"></div>
+                <div class="card-keywords" id="dailyKeywords"></div>
+                <div class="card-meaning" id="dailyMeaning"></div>
+                
+                <div class="card-section">
+                    <div class="section-title">💕 爱情运势</div>
+                    <div class="section-content" id="dailyLove"></div>
+                </div>
+                
+                <div class="card-section">
+                    <div class="section-title">💼 事业运势</div>
+                    <div class="section-content" id="dailyCareer"></div>
+                </div>
+                
+                <div class="card-section">
+                    <div class="section-title">💪 健康运势</div>
+                    <div class="section-content" id="dailyHealth"></div>
+                </div>
+                
+                <button class="ai-btn" id="aiBtn">🤖 AI深度解读</button>
+                
+                <div class="ai-loading" id="aiLoading">
+                    小七正在思考中...
+                </div>
+                
+                <div class="ai-response" id="aiResponse"></div>
+            </div>
+        </div>
+        
+        <!-- 三牌阵 -->
+        <div class="spread-section" id="spreadSection">
+            <div style="text-align:center; margin-bottom: 20px;">
+                <p style="color: rgba(255,255,255,0.7); font-size: 13px;">请依次点击三张牌</p>
+            </div>
+            
+            <div class="spread-cards">
+                <div class="spread-slot">
+                    <div class="spread-position">过去</div>
+                    <div class="spread-card" id="spreadCard0">点击抽牌</div>
+                </div>
+                <div class="spread-slot">
+                    <div class="spread-position">现在</div>
+                    <div class="spread-card" id="spreadCard1">点击抽牌</div>
+                </div>
+                <div class="spread-slot">
+                    <div class="spread-position">未来</div>
+                    <div class="spread-card" id="spreadCard2">点击抽牌</div>
+                </div>
+            </div>
+            
+            <button class="draw-btn" id="spreadResetBtn" style="display:none; margin: 15px auto;">🔄 重新抽牌</button>
+            
+            <div class="spread-result" id="spreadResult">
+                <div id="spreadResults"></div>
+                
+                <button class="ai-btn" id="aiSpreadBtn">🤖 AI综合解读</button>
+                
+                <div class="ai-loading" id="aiSpreadLoading">
+                    小七正在分析牌阵中...
+                </div>
+                
+                <div class="ai-response" id="aiSpreadResponse"></div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="features">
+            <div class="feature-item">
+                <div class="feature-icon">🃏</div>
+                <div class="feature-text">78张牌解读</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💫</div>
+                <div class="feature-text">诗意分析</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <div class="feature-text">四维运势</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-text">AI智能解读</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>让古老的塔罗智慧，照进你的日常生活</p>
+            <p style="margin-top: 6px;">© 2026 星契 · 小七出品</p>
+        </footer>
+    </div>
+    
+    <script src="tarot-data.js"></script>
+    <script>
+        // 星星背景
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 60; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            const size = Math.random() * 3 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            starsContainer.appendChild(star);
+        }
+        
+        // 初始化 - 刷新后重置
+        const dailyDrawBtn = document.getElementById('dailyDrawBtn');
+        const dailyCard = document.getElementById('dailyCard');
+        const dailyResult = document.getElementById('dailyResult');
+        
+        dailyResult.classList.remove('show');
+        dailyDrawBtn.textContent = '🔮 抽取今日塔罗';
+        document.getElementById('cardPreview').textContent = '🃏';
+        
+        // Tab切换
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tabName = tab.dataset.tab;
+                document.getElementById('dailySection').classList.toggle('active', tabName === 'daily');
+                document.getElementById('spreadSection').classList.toggle('active', tabName === 'spread');
+            });
+        });
+        
+        // 每日抽牌
+        let dailyCardData = null;
+        
+        dailyDrawBtn.addEventListener('click', () => {
+            dailyCard.classList.add('flipped');
+            
+            setTimeout(() => {
+                const card = getRandomCard();
+                dailyCardData = card;
+                
+                document.getElementById('cardPreview').textContent = card.emoji || '🃏';
+                document.getElementById('resultEmoji').textContent = card.emoji || '🃏';
+                document.getElementById('dailyName').textContent = card.name;
+                document.getElementById('dailyKeywords').innerHTML = card.keywords.map(k => `<span class="keyword">${k}</span>`).join('');
+                document.getElementById('dailyMeaning').textContent = card.meaning;
+                
+                if (card.love) document.getElementById('dailyLove').textContent = card.love;
+                if (card.career) document.getElementById('dailyCareer').textContent = card.career;
+                if (card.health) document.getElementById('dailyHealth').textContent = card.health;
+                
+                dailyResult.classList.add('show');
+                dailyCard.style.display = 'none';
+                dailyDrawBtn.textContent = '🔄 重新抽取';
+                
+                // 隐藏AI区域
+                document.getElementById('aiResponse').classList.remove('show');
+                document.getElementById('aiLoading').classList.remove('show');
+            }, 600);
+        });
+        
+        function toggleCard() {
+            if (dailyResult.classList.contains('show')) {
+                dailyResult.classList.remove('show');
+                document.getElementById('dailyCard').style.display = 'flex';
+            }
+        }
+        
+        // AI解读
+        document.getElementById('aiBtn').addEventListener('click', async () => {
+            if (!dailyCardData) return;
+            
+            const btn = document.getElementById('aiBtn');
+            const loading = document.getElementById('aiLoading');
+            const response = document.getElementById('aiResponse');
+            
+            btn.disabled = true;
+            loading.classList.add('show');
+            response.classList.remove('show');
+            
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `message=请深度解读塔罗牌「${dailyCardData.name}」的含义，结合今日运势，给出有诗意的分析和建议。`
+                });
+                
+                const data = await res.json();
+                response.textContent = data.reply || '小七暂时无法回应，请稍后再试。';
+            } catch (e) {
+                response.textContent = '小七暂时无法回应，请稍后再试。';
+            }
+            
+            btn.disabled = false;
+            loading.classList.remove('show');
+            response.classList.add('show');
+        });
+        
+        // 三牌阵
+        let spreadCards = [];
+        let spreadCount = 0;
+        
+        for (let i = 0; i < 3; i++) {
+            document.getElementById(`spreadCard${i}`).addEventListener('click', function() {
+                if (spreadCount > i) return;
+                
+                const card = getRandomCard();
+                spreadCards[i] = card;
+                spreadCount = i + 1;
+                
+                this.classList.add('revealed');
+                this.innerHTML = `<span style="font-size:28px">${card.emoji || '🃏'}</span><br><span style="font-size:9px">${card.name.split(' ')[0]}</span>`;
+                
+                if (spreadCount === 3) {
+                    showSpreadResult();
+                }
+            });
+        }
+        
+        function showSpreadResult() {
+            const resultDiv = document.getElementById('spreadResult');
+            const resultsDiv = document.getElementById('spreadResults');
+            
+            resultsDiv.innerHTML = spreadCards.map((card, i) => `
+                <div class="spread-item">
+                <div class="spread-item-title">${['过去', '现在', '未来'][i]}：${card.emoji || '🃏'} ${card.name}</div>
+                    <div class="card-keywords" style="margin-bottom:8px">${card.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}</div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.7); line-height:1.6">${card.meaning}</div>
+                </div>
+            `).join('');
+            
+            resultDiv.classList.add('show');
+            document.getElementById('spreadResetBtn').style.display = 'block';
+            
+            // 隐藏AI解读
+            document.getElementById('aiSpreadResponse').classList.remove('show');
+            document.getElementById('aiSpreadLoading').classList.remove('show');
+        }
+        
+        document.getElementById('spreadResetBtn').addEventListener('click', () => {
+            spreadCards = [];
+            spreadCount = 0;
+            
+            for (let i = 0; i < 3; i++) {
+                const card = document.getElementById(`spreadCard${i}`);
+                card.classList.remove('revealed');
+                card.innerHTML = '点击抽牌';
+            }
+            
+            document.getElementById('spreadResult').classList.remove('show');
+            document.getElementById('spreadResetBtn').style.display = 'none';
+        });
+        
+        // 三牌阵AI解读
+        document.getElementById('aiSpreadBtn').addEventListener('click', async () => {
+            if (spreadCards.length !== 3) return;
+            
+            const btn = document.getElementById('aiSpreadBtn');
+            const loading = document.getElementById('aiSpreadLoading');
+            const response = document.getElementById('aiSpreadResponse');
+            
+            btn.disabled = true;
+            loading.classList.add('show');
+            response.classList.remove('show');
+            
+            try {
+                const cardNames = spreadCards.map(c => c.name).join('、');
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `message=请解读这个三牌阵：过去${spreadCards[0].name}、现在${spreadCards[1].name}、未来${spreadCards[2].name}。分析它们之间的关联，给出综合指导建议。`
+                });
+                
+                const data = await res.json();
+                response.textContent = data.reply || '小七暂时无法回应，请稍后再试。';
+            } catch (e) {
+                response.textContent = '小七暂时无法回应，请稍后再试。';
+            }
+            
+            btn.disabled = false;
+            loading.classList.remove('show');
+            response.classList.add('show');
+        });
+    </script>
+</body>
+</html>

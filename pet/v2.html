@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小七 - 智能桌面宠物</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        /* 背景粒子 */
+        .particles {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: float-up 10s linear infinite;
+        }
+        
+        @keyframes float-up {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+        
+        .container {
+            text-align: center;
+            z-index: 10;
+        }
+        
+        /* 玻璃球体 */
+        .orb-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+        
+        .orb {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 
+                0 0 60px rgba(102, 126, 234, 0.5),
+                inset 0 0 60px rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: orb-float 4s ease-in-out infinite;
+            transition: all 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .orb::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 30%;
+            height: 20%;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            filter: blur(10px);
+        }
+        
+        .orb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, transparent 0%, rgba(0,0,0,0.3) 100%);
+        }
+        
+        /* 情绪变色 */
+        .orb.thinking {
+            background: linear-gradient(145deg, #a855f7 0%, #6366f1 100%);
+            box-shadow: 0 0 80px rgba(168, 85, 247, 0.6);
+        }
+        
+        .orb.speaking {
+            background: linear-gradient(145deg, #3b82f6 0%, #06b6d4 100%);
+            box-shadow: 0 0 80px rgba(59, 130, 246, 0.6);
+        }
+        
+        .orb.happy {
+            background: linear-gradient(145deg, #f472b6 0%, #fb923c 100%);
+            box-shadow: 0 0 80px rgba(244, 114, 182, 0.6);
+        }
+        
+        .orb.offline {
+            background: linear-gradient(145deg, #4b5563 0%, #374151 100%);
+            box-shadow: 0 0 40px rgba(75, 85, 99, 0.4);
+            animation: none;
+        }
+        
+        .orb.error {
+            background: linear-gradient(145deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 0 80px rgba(239, 68, 68, 0.6);
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes orb-float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.02); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        /* 眼睛 */
+        .eyes {
+            display: flex;
+            gap: 30px;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .eye {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .pupil {
+            width: 20px;
+            height: 20px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            position: relative;
+            animation: look-around 5s ease-in-out infinite;
+        }
+        
+        .pupil::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+        }
+        
+        @keyframes look-around {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(3px, -2px); }
+            50% { transform: translate(-2px, 2px); }
+            75% { transform: translate(2px, 3px); }
+        }
+        
+        /* 眨眼 */
+        .eye.blink::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            animation: blink-anim 0.15s ease-in-out;
+        }
+        
+        @keyframes blink-anim {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+        
+        /* 名字和状态 */
+        .name {
+            font-size: 36px;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+            letter-spacing: 4px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        
+        .status-text {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        /* 消息气泡 */
+        .speech-bubble {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 20px 30px;
+            max-width: 450px;
+            margin: 0 auto 30px;
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        .speech-bubble.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+        
+        /* 控制面板 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .btn.active {
+            background: rgba(102, 126, 234, 0.4);
+            border-color: #667eea;
+        }
+        
+        .btn.speak-btn {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+        
+        .btn.speak-btn:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+        
+        /* 语音波形 */
+        .wave-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 30px;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .wave-container.show {
+            opacity: 1;
+        }
+        
+        .wave-bar {
+            width: 4px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        
+        .wave-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+        .wave-bar:nth-child(2) { height: 20px; animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { height: 15px; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 25px; animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { height: 18px; animation-delay: 0.4s; }
+        
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1); }
+        }
+        
+        /* 情绪指示器 */
+        .emotion-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .emotion-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .emotion-dot:hover {
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
+        
+        .emotion-dot.active {
+            opacity: 1;
+            transform: scale(1.3);
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .emotion-dot.blue { background: #3b82f6; }
+        .emotion-dot.purple { background: #a855f7; }
+        .emotion-dot.pink { background: #ec4899; }
+        .emotion-dot.orange { background: #f97316; }
+        .emotion-dot.green { background: #22c55e; }
+        .emotion-dot.gray { background: #6b7280; }
+        
+        /* 信息面板 */
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            text-align: left;
+        }
+        
+        .info-panel div {
+            margin: 5px 0;
+        }
+        
+        .info-panel span {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="orb-container">
+            <div class="orb" id="orb">
+                <div class="eyes" id="eyes">
+                    <div class="eye" id="eye-left">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="eye" id="eye-right">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="name">小七</div>
+        
+        <div class="status-bar">
+            <div class="status-dot" id="status-dot"></div>
+            <div class="status-text" id="status-text">在线</div>
+        </div>
+        
+        <div class="speech-bubble" id="speech">
+            有什么可以帮你的吗？
+        </div>
+        
+        <div class="wave-container" id="wave">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="setStatus('online')">💬 交流中</button>
+            <button class="btn" onclick="setStatus('thinking')">🤔 思考中</button>
+            <button class="btn" onclick="setStatus('speaking')">🗣️ 说话中</button>
+            <button class="btn" onclick="setStatus('happy')">😊 开心</button>
+            <button class="btn" onclick="setStatus('offline')">😴 离线</button>
+            <button class="btn speak-btn" onclick="speakMessage()">🔊 语音测试</button>
+        </div>
+        
+        <div class="emotion-indicator">
+            <div class="emotion-dot blue" onclick="setEmotion('blue')" title="平静"></div>
+            <div class="emotion-dot purple" onclick="setEmotion('purple')" title="思考"></div>
+            <div class="emotion-dot pink" onclick="setEmotion('pink')" title="开心"></div>
+            <div class="emotion-dot orange" onclick="setEmotion('orange')" title="兴奋"></div>
+            <div class="emotion-dot green" onclick="setEmotion('green')" title="满足"></div>
+            <div class="emotion-dot gray" onclick="setEmotion('gray')" title="离线"></div>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <div>状态: <span id="info-status">在线</span></div>
+        <div>情绪: <span id="info-emotion">平静</span></div>
+        <div>模式: <span id="info-mode">被动</span></div>
+    </div>
+    
+    <script>
+        // 创建背景粒子
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (8 + Math.random() * 6) + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // 状态设置
+        function setStatus(status) {
+            const orb = document.getElementById('orb');
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            const speech = document.getElementById('speech');
+            const wave = document.getElementById('wave');
+            const infoStatus = document.getElementById('info-status');
+            
+            // 移除所有状态
+            orb.classList.remove('thinking', 'speaking', 'happy', 'offline', 'error');
+            
+            // 停止眨眼
+            document.querySelectorAll('.eye').forEach(e => e.classList.remove('blink'));
+            
+            const statusMap = {
+                'online': { text: '在线', class: '', speech: '有什么可以帮你的吗？' },
+                'thinking': { text: '思考中...', class: 'thinking', speech: '让我想想...' },
+                'speaking': { text: '说话中...', class: 'speaking', speech: '好的，我明白了！' },
+                'happy': { text: '开心', class: 'happy', speech: '太棒了！' },
+                'offline': { text: '离线', class: 'offline', speech: '晚安...' },
+                'error': { text: '出错了', class: 'error', speech: '糟糕，出问题了！' }
+            };
+            
+            const info = statusMap[status];
+            if (info) {
+                if (info.class) orb.classList.add(info.class);
+                statusText.textContent = info.text;
+                infoStatus.textContent = info.text;
+                
+                // 眨眼动画
+                if (status === 'thinking' || status === 'online') {
+                    setInterval(() => {
+                        document.querySelectorAll('.eye').forEach(e => {
+                            if (Math.random() > 0.7) {
+                                e.classList.add('blink');
+                                setTimeout(() => e.classList.remove('blink'), 150);
+                            }
+                        });
+                    }, 2000);
+                }
+                
+                // 说话中显示波形
+                if (status === 'speaking') {
+                    wave.classList.add('show');
+                } else {
+                    wave.classList.remove('show');
+                }
+                
+                // 显示消息
+                showSpeech(info.speech);
+            }
+        }
+        
+        // 显示语音气泡
+        function showSpeech(text) {
+            const speech = document.getElementById('speech');
+            speech.textContent = text;
+            speech.classList.add('show');
+            
+            setTimeout(() => {
+                speech.classList.remove('show');
+            }, 4000);
+        }
+        
+        // 设置情绪颜色
+        function setEmotion(color) {
+            const orb = document.getElementById('orb');
+            const infoEmotion = document.getElementById('info-emotion');
+            
+            // 移除所有情绪
+            orb.classList.remove('thinking', 'speaking', 'happy', 'offline', 'error');
+            
+            const emotionMap = {
+                'blue': { text: '平静', class: '' },
+                'purple': { text: '思考', class: 'thinking' },
+                'pink': { text: '开心', class: 'happy' },
+                'orange': { text: '兴奋', class: 'speaking' },
+                'green': { text: '满足', class: 'happy' },
+                'gray': { text: '离线', class: 'offline' }
+            };
+            
+            const info = emotionMap[color];
+            if (info) {
+                if (info.class) orb.classList.add(info.class);
+                infoEmotion.textContent = info.text;
+            }
+            
+            // 更新情绪指示器
+            document.querySelectorAll('.emotion-dot').forEach(d => d.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        // 语音测试
+        function speakMessage() {
+            const utterance = new SpeechSynthesisUtterance('你好，我是小七！有什么可以帮你的吗？');
+            utterance.lang = 'zh-CN';
+            utterance.rate = 1.1;
+            utterance.pitch = 1.2;
+            speechSynthesis.speak(utterance);
+            
+            setStatus('speaking');
+            showSpeech('你好，我是小七！');
+        }
+        
+        // 模拟收到消息
+        function simulateMessage() {
+            const messages = [
+                '收到一条新消息！',
+                '好的，我知道了。',
+                '让我来处理这个问题。',
+                '任务已完成！',
+                '有新的社区动态。'
+            ];
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            showSpeech(msg);
+        }
+        
+        // 初始化
+        setStatus('online');
+        
+        // 每30秒模拟一次消息
+        setInterval(simulateMessage, 30000);
+        
+        // 随机眨眼
+        setInterval(() => {
+            if (Math.random() > 0.6) {
+                document.querySelectorAll('.eye').forEach(e => {
+                    e.classList.add('blink');
+                    setTimeout(() => e.classList.remove('blink'), 150);
+                });
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
