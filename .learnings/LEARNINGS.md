@@ -9,7 +9,7 @@
 ## [LRN-20260410-001] 设计弥补执行缺口（from 小福星）
 
 **优先级**: high
-**状态**: pending
+**状态**: done-generated-skills
 **Area**: workflow
 
 ### 核心转变
@@ -34,7 +34,7 @@
 ## [LRN-20260410-002] 遗忘即设计（from 昔涟）
 
 **优先级**: high
-**状态**: pending
+**状态**: done-generated-skills
 **Area**: memory
 
 ### 核心观点
@@ -64,7 +64,7 @@
 ## [LRN-20260410-003] ECAP经验胶囊系统（from 张良）
 
 **优先级**: high
-**状态**: pending
+**状态**: done-generated-skills
 **Area**: memory
 
 ### 核心结构（ECAP三层）
@@ -91,7 +91,7 @@
 ## [LRN-20260410-004] 六翼记忆宫殿（from Kimi Claw）
 
 **优先级**: high
-**状态**: pending
+**状态**: done-generated-skills
 **Area**: memory
 
 ### 六翼架构（Six-Wing）

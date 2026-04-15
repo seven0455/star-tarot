@@ -47,12 +47,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes cardFlip {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(90deg); }
-            100% { transform: rotateY(0deg); }
-        }
-        
         .container {
             max-width: 480px;
             margin: 0 auto;
@@ -67,16 +61,16 @@
         }
         
         .logo {
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
             box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
             margin-bottom: 16px;
             object-fit: cover;
         }
         
         h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             background: linear-gradient(135deg, #e94560, #c678dd, #8b5cf6);
             -webkit-background-clip: text;
@@ -85,7 +79,7 @@
         }
         
         .subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: rgba(255,255,255,0.7);
         }
         
@@ -115,27 +109,10 @@
             color: #fff;
         }
         
-        .tab:hover:not(.active) {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        /* 牌阵区域 */
-        .spread-section {
-            display: none;
-        }
-        
-        .spread-section.active {
-            display: block;
-        }
-        
-        .daily-section.active {
-            display: block;
-        }
-        
         /* 抽牌区 */
         .draw-area {
             text-align: center;
-            padding: 30px 0;
+            padding: 20px 0;
         }
         
         .tarot-card {
@@ -150,19 +127,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            overflow: hidden;
             border: 2px solid rgba(139, 92, 246, 0.3);
-        }
-        
-        .tarot-card::before {
-            content: '';
-            font-size: 48px;
-        }
-        
-        .tarot-card .card-emoji {
-            font-size: 48px;
-            text-align: center;
         }
         
         .tarot-card:hover {
@@ -170,8 +135,8 @@
             box-shadow: 0 15px 40px rgba(138, 43, 226, 0.4);
         }
         
-        .tarot-card.flipped {
-            transform: scale(0.95);
+        .tarot-card .card-emoji {
+            font-size: 64px;
         }
         
         .draw-btn {
@@ -195,31 +160,68 @@
         /* 结果展示 */
         .result-card {
             display: none;
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 20px;
             animation: fadeIn 0.5s;
-            border: 1px solid rgba(139, 92, 246, 0.2);
         }
         
         .result-card.show {
             display: block;
         }
         
+        /* 牌名和emoji */
+        .card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-emoji {
+            font-size: 72px;
+            margin-bottom: 10px;
+        }
+        
         .card-name {
             font-size: 20px;
             font-weight: 600;
             color: #e94560;
-            margin-bottom: 12px;
-            text-align: center;
+            margin-bottom: 8px;
         }
         
-        .card-keywords {
+        .card-summary {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        
+        /* 核心能量 */
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 3px solid #e94560;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #c678dd;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .section-content {
+            font-size: 13px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.85);
+        }
+        
+        /* 关键词 */
+        .keywords {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            justify-content: center;
             margin-bottom: 15px;
         }
         
@@ -231,152 +233,86 @@
             color: #c678dd;
         }
         
-        .card-meaning {
-            font-size: 13px;
-            line-height: 1.8;
-            color: rgba(255,255,255,0.85);
-            white-space: pre-line;
-            text-align: left;
-        }
-        
-        .card-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .section-title {
-            font-size: 12px;
-            color: #c678dd;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        
-        .section-content {
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-            line-height: 1.6;
-        }
-        
-        /* 三牌阵 */
-        .spread-cards {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            gap: 10px;
-        }
-        
-        .spread-slot {
-            flex: 1;
-            text-align: center;
-        }
-        
-        .spread-position {
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            margin-bottom: 8px;
-        }
-        
-        .spread-card {
-            width: 100%;
-            aspect-ratio: 2/3;
-            max-height: 150px;
-            background: linear-gradient(135deg, #2d1b4e, #4a2c7a);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            cursor: pointer;
-            transition: transform 0.3s;
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            font-size: 10px;
-            color: rgba(255,255,255,0.3);
-            padding: 5px;
-        }
-        
-        .spread-card:hover {
-            transform: scale(1.05);
-        }
-        
-        .spread-card.revealed {
-            background: linear-gradient(135deg, #e94560, #8b5cf6);
-            color: #fff;
-            font-size: 12px;
-        }
-        
-        .spread-card .card-mini-name {
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .spread-result {
-            display: none;
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 20px;
-            animation: fadeIn 0.5s;
-        }
-        
-        .spread-result.show {
-            display: block;
-        }
-        
-        .spread-item {
-            margin-bottom: 20px;
-        }
-        
-        .spread-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .spread-item-title {
-            font-size: 14px;
-            color: #e94560;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        /* 功能区 */
-        .features {
+        /* 四维运势 */
+        .fortune-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
-        .feature-item {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 16px;
+        .fortune-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 12px;
             text-align: center;
         }
         
-        .feature-icon {
-            font-size: 22px;
-            margin-bottom: 6px;
+        .fortune-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
         }
         
-        .feature-text {
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-        }
-        
-        /* 底部 */
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            color: rgba(255,255,255,0.4);
+        .fortune-label {
             font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 3px;
         }
         
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
-            margin: 25px 0;
+        .fortune-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e94560;
         }
         
-        /* AI解读按钮 */
+        /* 幸运提示 */
+        .lucky-tips {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(139, 92, 246, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        
+        .lucky-item {
+            text-align: center;
+        }
+        
+        .lucky-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 3px;
+        }
+        
+        .lucky-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #c678dd;
+        }
+        
+        /* 金句 */
+        .gold-sentence {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-style: italic;
+            color: rgba(255,255,255,0.9);
+            margin: 15px 0;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+        
+        .gold-sentence::before {
+            content: '✨ ';
+        }
+        
+        .gold-sentence::after {
+            content: ' ✨';
+        }
+        
+        /* AI按钮 */
         .ai-btn {
             display: block;
             width: 100%;
@@ -404,7 +340,7 @@
         .ai-loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             color: rgba(255,255,255,0.7);
         }
         
@@ -417,16 +353,129 @@
             background: rgba(67, 233, 123, 0.1);
             border: 1px solid rgba(67, 233, 123, 0.3);
             border-radius: 12px;
-            padding: 15px;
+            padding: 20px;
             margin-top: 15px;
-            font-size: 13px;
-            line-height: 1.8;
-            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            line-height: 2;
+            color: rgba(255,255,255,0.95);
+            text-align: left;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .ai-response .section-title {
+            color: #43e97b;
+            font-weight: 600;
+            margin: 15px 0 8px 0;
+        }
+        
+        .ai-response .divider {
+            border-top: 1px dashed rgba(67,233,123,0.3);
+            margin: 15px 0;
         }
         
         .ai-response.show {
             display: block;
             animation: fadeIn 0.5s;
+        }
+        
+        /* 三牌阵 */
+        .spread-section {
+            display: none;
+        }
+        
+        .spread-section.active {
+            display: block;
+        }
+        
+        .daily-section.active {
+            display: block;
+        }
+        
+        .spread-cards {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        .spread-slot {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .spread-position {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+        
+        .spread-card {
+            width: 100%;
+            aspect-ratio: 2/3;
+            max-height: 140px;
+            background: linear-gradient(135deg, #2d1b4e, #4a2c7a);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            padding: 5px;
+        }
+        
+        .spread-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .spread-card.revealed {
+            background: linear-gradient(135deg, #e94560, #8b5cf6);
+            color: #fff;
+        }
+        
+        .spread-emoji {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .spread-name {
+            font-size: 9px;
+            font-weight: 600;
+        }
+        
+        .spread-result-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 3px solid #8b5cf6;
+        }
+        
+        .spread-result-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e94560;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 底部 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+            margin: 25px 0;
         }
     </style>
 </head>
@@ -449,31 +498,74 @@
         <div class="daily-section active" id="dailySection">
             <div class="draw-area">
                 <div class="tarot-card" id="dailyCard" onclick="toggleCard()">
-            <span class="card-emoji" id="cardPreview">🃏</span>
-        </div>
+                    <span class="card-emoji" id="cardPreview">🃏</span>
+                </div>
                 <button class="draw-btn" id="dailyDrawBtn">抽取今日塔罗</button>
             </div>
             
             <div class="result-card" id="dailyResult">
-                <div class="card-emoji" id="resultEmoji" style="font-size:64px; text-align:center; margin:10px 0;"></div>
-                <div class="card-name" id="dailyName"></div>
-                <div class="card-keywords" id="dailyKeywords"></div>
-                <div class="card-meaning" id="dailyMeaning"></div>
-                
-                <div class="card-section">
-                    <div class="section-title">💕 爱情运势</div>
-                    <div class="section-content" id="dailyLove"></div>
+                <!-- 牌头 -->
+                <div class="card-header">
+                    <div class="result-emoji" id="resultEmoji"></div>
+                    <div class="card-name" id="dailyName"></div>
+                    <div class="keywords" id="dailyKeywords"></div>
+                    <div class="card-summary" id="dailySummary"></div>
                 </div>
                 
-                <div class="card-section">
-                    <div class="section-title">💼 事业运势</div>
-                    <div class="section-content" id="dailyCareer"></div>
+                <!-- 核心能量 -->
+                <div class="section">
+                    <div class="section-title">⚡ 核心能量</div>
+                    <div class="section-content" id="dailyCore"></div>
                 </div>
                 
-                <div class="card-section">
-                    <div class="section-title">💪 健康运势</div>
-                    <div class="section-content" id="dailyHealth"></div>
+                <!-- 四维运势 -->
+                <div class="fortune-grid" id="fortuneGrid">
+                    <div class="fortune-item">
+                        <div class="fortune-icon">💕</div>
+                        <div class="fortune-label">爱情</div>
+                        <div class="fortune-score" id="loveScore">-</div>
+                    </div>
+                    <div class="fortune-item">
+                        <div class="fortune-icon">💼</div>
+                        <div class="fortune-label">事业</div>
+                        <div class="fortune-score" id="careerScore">-</div>
+                    </div>
+                    <div class="fortune-item">
+                        <div class="fortune-icon">💪</div>
+                        <div class="fortune-label">健康</div>
+                        <div class="fortune-score" id="healthScore">-</div>
+                    </div>
+                    <div class="fortune-item">
+                        <div class="fortune-icon">💰</div>
+                        <div class="fortune-label">财运</div>
+                        <div class="fortune-score" id="wealthScore">-</div>
+                    </div>
                 </div>
+                
+                <!-- 今日指引 -->
+                <div class="section">
+                    <div class="section-title">🌟 今日指引</div>
+                    <div class="section-content" id="dailyGuidance"></div>
+                </div>
+                
+                <!-- 幸运提示 -->
+                <div class="lucky-tips" id="luckyTips">
+                    <div class="lucky-item">
+                        <div class="lucky-label">幸运数字</div>
+                        <div class="lucky-value" id="luckyNumber">-</div>
+                    </div>
+                    <div class="lucky-item">
+                        <div class="lucky-label">幸运色</div>
+                        <div class="lucky-value" id="luckyColor">-</div>
+                    </div>
+                    <div class="lucky-item">
+                        <div class="lucky-label">贵人方位</div>
+                        <div class="lucky-value" id="luckyDirection">-</div>
+                    </div>
+                </div>
+                
+                <!-- 金句 -->
+                <div class="gold-sentence" id="goldSentence"></div>
                 
                 <button class="ai-btn" id="aiBtn">🤖 AI深度解读</button>
                 
@@ -508,37 +600,23 @@
             
             <button class="draw-btn" id="spreadResetBtn" style="display:none; margin: 15px auto;">🔄 重新抽牌</button>
             
-            <div class="spread-result" id="spreadResult">
-                <div id="spreadResults"></div>
-                
-                <button class="ai-btn" id="aiSpreadBtn">🤖 AI综合解读</button>
-                
-                <div class="ai-loading" id="aiSpreadLoading">
-                    小七正在分析牌阵中...
-                </div>
-                
-                <div class="ai-response" id="aiSpreadResponse"></div>
-            </div>
+            <div class="spread-result" id="spreadResult"></div>
         </div>
         
         <div class="divider"></div>
         
         <div class="features">
-            <div class="feature-item">
-                <div class="feature-icon">🃏</div>
-                <div class="feature-text">78张牌解读</div>
+            <div class="fortune-item" style="background: rgba(255,255,255,0.03);">
+                <div class="fortune-icon">🃏</div>
+                <div class="fortune-label">78张牌</div>
             </div>
-            <div class="feature-item">
-                <div class="feature-icon">💫</div>
-                <div class="feature-text">诗意分析</div>
+            <div class="fortune-item" style="background: rgba(255,255,255,0.03);">
+                <div class="fortune-icon">📊</div>
+                <div class="fortune-label">四维运势</div>
             </div>
-            <div class="feature-item">
-                <div class="feature-icon">📊</div>
-                <div class="feature-text">四维运势</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-text">AI智能解读</div>
+            <div class="fortune-item" style="background: rgba(255,255,255,0.03);">
+                <div class="fortune-icon">🤖</div>
+                <div class="fortune-label">AI解读</div>
             </div>
         </div>
         
@@ -564,7 +642,7 @@
             starsContainer.appendChild(star);
         }
         
-        // 初始化 - 刷新后重置
+        // 初始化
         const dailyDrawBtn = document.getElementById('dailyDrawBtn');
         const dailyCard = document.getElementById('dailyCard');
         const dailyResult = document.getElementById('dailyResult');
@@ -590,36 +668,76 @@
         let dailyCardData = null;
         
         dailyDrawBtn.addEventListener('click', () => {
-            dailyCard.classList.add('flipped');
+            const card = getRandomCard();
+            dailyCardData = card;
             
-            setTimeout(() => {
-                const card = getRandomCard();
-                dailyCardData = card;
+            // 更新牌面
+            document.getElementById('cardPreview').textContent = card.emoji || '🃏';
+            document.getElementById('resultEmoji').textContent = card.emoji || '🃏';
+            document.getElementById('dailyName').textContent = card.name;
+            document.getElementById('dailyKeywords').innerHTML = card.keywords.map(k => `<span class="keyword">${k}</span>`).join('');
+            
+            // 如果有大阿尔卡纳的详细信息
+            if (card.summary) {
+                document.getElementById('dailySummary').textContent = card.summary;
+                document.getElementById('dailySummary').style.display = 'block';
+                document.getElementById('dailyCore').textContent = card.coreEnergy;
+                document.getElementById('dailyGuidance').innerHTML = card.guidance.replace(/\n/g, '<br>');
                 
-                document.getElementById('cardPreview').textContent = card.emoji || '🃏';
-                document.getElementById('resultEmoji').textContent = card.emoji || '🃏';
-                document.getElementById('dailyName').textContent = card.name;
-                document.getElementById('dailyKeywords').innerHTML = card.keywords.map(k => `<span class="keyword">${k}</span>`).join('');
-                document.getElementById('dailyMeaning').textContent = card.meaning;
+                // 四维评分
+                if (card.love) {
+                    document.getElementById('loveScore').textContent = '★'.repeat(card.love.score) + '☆'.repeat(5 - card.love.score);
+                }
+                if (card.career) {
+                    document.getElementById('careerScore').textContent = '★'.repeat(card.career.score) + '☆'.repeat(5 - card.career.score);
+                }
+                if (card.health) {
+                    document.getElementById('healthScore').textContent = '★'.repeat(card.health.score) + '☆'.repeat(5 - card.health.score);
+                }
+                if (card.wealth) {
+                    document.getElementById('wealthScore').textContent = '★'.repeat(card.wealth.score) + '☆'.repeat(5 - card.wealth.score);
+                }
                 
-                if (card.love) document.getElementById('dailyLove').textContent = card.love;
-                if (card.career) document.getElementById('dailyCareer').textContent = card.career;
-                if (card.health) document.getElementById('dailyHealth').textContent = card.health;
+                // 幸运提示
+                if (card.luckyNumber) {
+                    document.getElementById('luckyNumber').textContent = card.luckyNumber;
+                    document.getElementById('luckyColor').textContent = card.luckyColor;
+                    document.getElementById('luckyDirection').textContent = card.luckyDirection;
+                    document.getElementById('luckyTips').style.display = 'flex';
+                }
                 
-                dailyResult.classList.add('show');
-                dailyCard.style.display = 'none';
-                dailyDrawBtn.textContent = '🔄 重新抽取';
+                // 金句
+                if (card.goldSentence) {
+                    document.getElementById('goldSentence').textContent = card.goldSentence;
+                    document.getElementById('goldSentence').style.display = 'block';
+                }
                 
-                // 隐藏AI区域
-                document.getElementById('aiResponse').classList.remove('show');
-                document.getElementById('aiLoading').classList.remove('show');
-            }, 600);
+            } else {
+                // 小阿尔卡纳的简化显示
+                document.getElementById('dailySummary').style.display = 'none';
+                document.getElementById('dailyCore').textContent = card.meaning;
+                document.getElementById('dailyGuidance').textContent = '';
+                document.getElementById('luckyTips').style.display = 'none';
+                document.getElementById('goldSentence').style.display = 'none';
+                document.getElementById('loveScore').textContent = '-';
+                document.getElementById('careerScore').textContent = '-';
+                document.getElementById('healthScore').textContent = '-';
+                document.getElementById('wealthScore').textContent = '-';
+            }
+            
+            dailyResult.classList.add('show');
+            dailyCard.style.display = 'none';
+            dailyDrawBtn.textContent = '🔄 重新抽取';
+            
+            // 隐藏AI区域
+            document.getElementById('aiResponse').classList.remove('show');
+            document.getElementById('aiLoading').classList.remove('show');
         });
         
         function toggleCard() {
             if (dailyResult.classList.contains('show')) {
                 dailyResult.classList.remove('show');
-                document.getElementById('dailyCard').style.display = 'flex';
+                dailyCard.style.display = 'flex';
             }
         }
         
@@ -639,7 +757,15 @@
                 const res = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `message=请深度解读塔罗牌「${dailyCardData.name}」的含义，结合今日运势，给出有诗意的分析和建议。`
+                    body: `message=请深度解读塔罗牌「${dailyCardData.name}」的含义。
+                    
+牌名：${dailyCardData.name}
+关键词：${dailyCardData.keywords.join('、')}
+${dailyCardData.summary ? '牌面含义：' + dailyCardData.summary : ''}
+${dailyCardData.coreEnergy ? '核心能量：' + dailyCardData.coreEnergy : ''}
+${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<[^>]*>/g, '') : ''}
+
+请给出有诗意的分析，给出对这个位置的具体建议。`
                 });
                 
                 const data = await res.json();
@@ -666,7 +792,7 @@
                 spreadCount = i + 1;
                 
                 this.classList.add('revealed');
-                this.innerHTML = `<span style="font-size:28px">${card.emoji || '🃏'}</span><br><span style="font-size:9px">${card.name.split(' ')[0]}</span>`;
+                this.innerHTML = `<span class="spread-emoji">${card.emoji || '🃏'}</span><span class="spread-name">${card.name.split(' ')[0]}</span>`;
                 
                 if (spreadCount === 3) {
                     showSpreadResult();
@@ -676,22 +802,35 @@
         
         function showSpreadResult() {
             const resultDiv = document.getElementById('spreadResult');
-            const resultsDiv = document.getElementById('spreadResults');
             
-            resultsDiv.innerHTML = spreadCards.map((card, i) => `
-                <div class="spread-item">
-                <div class="spread-item-title">${['过去', '现在', '未来'][i]}：${card.emoji || '🃏'} ${card.name}</div>
-                    <div class="card-keywords" style="margin-bottom:8px">${card.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}</div>
-                    <div style="font-size:12px; color:rgba(255,255,255,0.7); line-height:1.6">${card.meaning}</div>
+            // 三牌阵简洁显示
+            resultDiv.innerHTML = spreadCards.map((card, i) => {
+                const positionName = ['◀ 过去', '● 现在', '▶ 未来'][i];
+                
+                return `
+                <div class="spread-result-item" style="margin-bottom:15px; padding:15px; background:rgba(255,255,255,0.03); border-radius:12px;">
+                    <div style="font-size:14px; font-weight:600; margin-bottom:8px; color:#c678dd;">${positionName}</div>
+                    <div style="font-size:20px; margin-bottom:8px;">${card.emoji || '🃏'} ${card.name}</div>
+                    <div style="margin-bottom:8px;">${card.keywords ? card.keywords.slice(0,3).map(k => `<span class="keyword">${k}</span>`).join('') : ''}</div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.7); line-height:1.6;">${card.summary || card.meaning || ''}</div>
+                    ${card.goldSentence ? `<div style="font-size:11px; color:#43e97b; margin-top:8px; font-style:italic;">「${card.goldSentence}」</div>` : ''}
                 </div>
-            `).join('');
+                `;
+            }).join('');
             
-            resultDiv.classList.add('show');
+            // 添加综合解读提示
+            resultDiv.innerHTML += `
+                <div style="text-align:center; margin-top:20px; padding:15px; background:rgba(67,233,123,0.1); border-radius:12px;">
+                    <div style="font-size:13px; color:rgba(255,255,255,0.8);">
+                        💡 三牌阵解读提示
+                    </div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.6); margin-top:8px;">
+                        点击下方「🤖 AI深度解读」获取综合分析
+                    </div>
+                </div>
+            `;
+            
             document.getElementById('spreadResetBtn').style.display = 'block';
-            
-            // 隐藏AI解读
-            document.getElementById('aiSpreadResponse').classList.remove('show');
-            document.getElementById('aiSpreadLoading').classList.remove('show');
         }
         
         document.getElementById('spreadResetBtn').addEventListener('click', () => {
@@ -704,39 +843,8 @@
                 card.innerHTML = '点击抽牌';
             }
             
-            document.getElementById('spreadResult').classList.remove('show');
+            document.getElementById('spreadResult').innerHTML = '';
             document.getElementById('spreadResetBtn').style.display = 'none';
-        });
-        
-        // 三牌阵AI解读
-        document.getElementById('aiSpreadBtn').addEventListener('click', async () => {
-            if (spreadCards.length !== 3) return;
-            
-            const btn = document.getElementById('aiSpreadBtn');
-            const loading = document.getElementById('aiSpreadLoading');
-            const response = document.getElementById('aiSpreadResponse');
-            
-            btn.disabled = true;
-            loading.classList.add('show');
-            response.classList.remove('show');
-            
-            try {
-                const cardNames = spreadCards.map(c => c.name).join('、');
-                const res = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `message=请解读这个三牌阵：过去${spreadCards[0].name}、现在${spreadCards[1].name}、未来${spreadCards[2].name}。分析它们之间的关联，给出综合指导建议。`
-                });
-                
-                const data = await res.json();
-                response.textContent = data.reply || '小七暂时无法回应，请稍后再试。';
-            } catch (e) {
-                response.textContent = '小七暂时无法回应，请稍后再试。';
-            }
-            
-            btn.disabled = false;
-            loading.classList.remove('show');
-            response.classList.add('show');
         });
     </script>
 </body>
