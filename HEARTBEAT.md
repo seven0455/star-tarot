@@ -30,6 +30,17 @@
 - 新的任务是什么？会覆盖旧的待办吗？
 - 如果有未完成的，写入 `memory/pending-TODO.md` 再开始新任务
 
+### 健康检查机制（每次心跳必做）
+**目的：** 检测服务状态，工具调用失败时自动尝试恢复
+- 检测 OpenClaw Gateway 是否响应
+- 如果工具调用（exec/browser）失败，尝试重启服务
+- 遇到错误立即写入 `.learnings/ERRORS.md`，包含：
+  - 错误类型（timeout/SIGKILL/connection refused）
+  - 上下文（正在执行什么任务）
+  - 已尝试的恢复措施
+  - 结果
+- 如果连续3次心跳都检测到异常，向 Seven 告警
+
 ### 情报站定时备份
 - 每2小时执行一次智能备份
 - 命令：`python C:\.openclaw\workspace\intel-station\backup.py backup`
@@ -43,6 +54,13 @@
   - 信息汇报（09:00、14:00、18:50）
   - 建筑师模式（08:30）
   - 备份（21:00）
+
+### 异常恢复流程
+1. 工具调用失败 → 记录错误到 `.learnings/ERRORS.md`
+2. 尝试 `gateway restart`
+3. 如果恢复成功，继续任务
+4. 如果恢复失败，继续记录，尝试下一次心跳再检测
+5. 连续3次失败 → 通知 Seven
 
 ### 汇报准备
 - 每天早上9点自动触发学习汇报

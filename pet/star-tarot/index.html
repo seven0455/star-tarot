@@ -392,6 +392,14 @@
             display: block;
         }
         
+        .daily-section {
+            display: none;
+        }
+        
+        .daily-section.active {
+            display: block;
+        }
+        
         .spread-cards {
             display: flex;
             justify-content: space-between;
@@ -653,14 +661,26 @@
         
         // Tab切换
         const tabs = document.querySelectorAll('.tab');
+        const dailySection = document.getElementById('dailySection');
+        const spreadSection = document.getElementById('spreadSection');
+        
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 
                 const tabName = tab.dataset.tab;
-                document.getElementById('dailySection').classList.toggle('active', tabName === 'daily');
-                document.getElementById('spreadSection').classList.toggle('active', tabName === 'spread');
+                
+                // 先隐藏所有section
+                dailySection.classList.remove('active');
+                spreadSection.classList.remove('active');
+                
+                // 再显示目标section
+                if (tabName === 'daily') {
+                    dailySection.classList.add('active');
+                } else {
+                    spreadSection.classList.add('active');
+                }
             });
         });
         
@@ -803,34 +823,186 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         function showSpreadResult() {
             const resultDiv = document.getElementById('spreadResult');
             
-            // 三牌阵简洁显示
-            resultDiv.innerHTML = spreadCards.map((card, i) => {
-                const positionName = ['◀ 过去', '● 现在', '▶ 未来'][i];
+            const positions = [
+                { name: '◀ 过去', icon: '🔙', desc: '已经发生的事', color: '#a78bfa' },
+                { name: '● 现在', icon: '⏳', desc: '正在发生的事', color: '#c678dd' },
+                { name: '▶ 未来', icon: '🔮', desc: '即将发生的事', color: '#43e97b' }
+            ];
+            
+            let html = '<div style="max-width:650px; margin:0 auto;">';
+            
+            // ========== 第一部分：每张牌的详细信息 ==========
+            html += '<div style="margin-bottom:25px;">';
+            html += '<div style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:15px; text-align:center;">━━━━━━━ 三牌详情 ━━━━━━━</div>';
+            
+            spreadCards.forEach((card, i) => {
+                const pos = positions[i];
+                const coreEnergy = card.coreEnergy || '待发现';
                 
-                return `
-                <div class="spread-result-item" style="margin-bottom:15px; padding:15px; background:rgba(255,255,255,0.03); border-radius:12px;">
-                    <div style="font-size:14px; font-weight:600; margin-bottom:8px; color:#c678dd;">${positionName}</div>
-                    <div style="font-size:20px; margin-bottom:8px;">${card.emoji || '🃏'} ${card.name}</div>
-                    <div style="margin-bottom:8px;">${card.keywords ? card.keywords.slice(0,3).map(k => `<span class="keyword">${k}</span>`).join('') : ''}</div>
-                    <div style="font-size:12px; color:rgba(255,255,255,0.7); line-height:1.6;">${card.summary || card.meaning || ''}</div>
-                    ${card.goldSentence ? `<div style="font-size:11px; color:#43e97b; margin-top:8px; font-style:italic;">「${card.goldSentence}」</div>` : ''}
+                html += `
+                <div style="margin-bottom:15px; padding:15px; background:rgba(255,255,255,0.02); border-radius:12px; border-left:3px solid ${pos.color};">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:60px; height:85px; background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(67,233,123,0.15)); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                            <span style="font-size:28px;">${card.emoji || '🃏'}</span>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:13px; font-weight:600; color:${pos.color}; margin-bottom:4px;">${pos.icon} ${pos.name}</div>
+                            <div style="font-size:14px; font-weight:600; margin-bottom:4px;">${card.name}</div>
+                            <div style="font-size:10px; color:${pos.color}; margin-bottom:6px;">⚡ ${coreEnergy}</div>
+                            <div>${card.keywords ? card.keywords.slice(0,3).map(k => `<span style="display:inline-block; padding:2px 7px; margin:1px; background:rgba(139,92,246,0.2); border-radius:10px; font-size:10px;">${k}</span>`).join('') : ''}</div>
+                        </div>
+                    </div>
                 </div>
                 `;
-            }).join('');
+            });
+            html += '</div>';
             
-            // 添加综合解读提示
-            resultDiv.innerHTML += `
-                <div style="text-align:center; margin-top:20px; padding:15px; background:rgba(67,233,123,0.1); border-radius:12px;">
-                    <div style="font-size:13px; color:rgba(255,255,255,0.8);">
-                        💡 三牌阵解读提示
+            // ========== 第二部分：三牌整体解读 ==========
+            const card0 = spreadCards[0], card1 = spreadCards[1], card2 = spreadCards[2];
+            const theme = `${card0.keywords ? card0.keywords[0] : '探索'} → ${card1.keywords ? card1.keywords[0] : '行动'} → ${card2.keywords ? card2.keywords[0] : '收获'}`;
+            const loveTotal = (card0.love?.score || 0) + (card1.love?.score || 0) + (card2.love?.score || 0);
+            const careerTotal = (card0.career?.score || 0) + (card1.career?.score || 0) + (card2.career?.score || 0);
+            const healthTotal = (card0.health?.score || 0) + (card1.health?.score || 0) + (card2.health?.score || 0);
+            const wealthTotal = (card0.wealth?.score || 0) + (card1.wealth?.score || 0) + (card2.wealth?.score || 0);
+            
+            const g0 = card0.guidance ? card0.guidance.replace(/[#*🎩🌙👑💕⚔️🛐]/g,'').substring(0,250).trim() : '';
+            const g1 = card1.guidance ? card1.guidance.replace(/[#*🎩🌙👑💕⚔️🛐]/g,'').substring(0,250).trim() : '';
+            const g2 = card2.guidance ? card2.guidance.replace(/[#*🎩🌙👑💕⚔️🛐]/g,'').substring(0,250).trim() : '';
+            
+            // 能量等级判断
+            const loveLevel = loveTotal >= 10 ? '较强' : loveTotal >= 6 ? '平稳' : '需要关注';
+            const careerLevel = careerTotal >= 10 ? '有进展' : careerTotal >= 6 ? '平稳' : '需要等待';
+            const healthLevel = healthTotal >= 10 ? '良好' : healthTotal >= 6 ? '一般' : '需要注意';
+            const wealthLevel = wealthTotal >= 10 ? '较好' : wealthTotal >= 6 ? '平稳' : '保守行事';
+            
+            html += `
+            <div style="margin-bottom:25px;">
+                <div style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:15px; text-align:center;">━━━━━━━ 整体解读 ━━━━━━━</div>
+                <div style="padding:22px; background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(67,233,123,0.08)); border-radius:16px; border:1px solid rgba(139,92,246,0.12);">
+                    
+                    <div style="padding:14px; background:rgba(0,0,0,0.25); border-radius:12px; margin-bottom:18px;">
+                        <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:6px; letter-spacing:1px;">ENERGY THEME</div>
+                        <div style="font-size:16px; font-weight:600; color:rgba(255,255,255,0.95);">${theme}</div>
                     </div>
-                    <div style="font-size:12px; color:rgba(255,255,255,0.6); margin-top:8px;">
-                        点击下方「🤖 AI深度解读」获取综合分析
+                    
+                    <div style="border-left:3px solid #a78bfa; padding:12px 14px; background:rgba(167,139,250,0.06); border-radius:0 10px 10px 0; margin-bottom:14px;">
+                        <div style="font-size:12px; color:#a78bfa; font-weight:600; margin-bottom:6px;">◀ 过去 · ${card0.name} ${card0.emoji}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.75); margin-bottom:8px;">💫 ${card0.summary || '你的起点，塑造了今天的你'}</div>
+                        ${g0 ? `<div style="font-size:10px; color:rgba(255,255,255,0.55); line-height:1.8; padding-top:8px; border-top:1px solid rgba(167,139,250,0.15);">📖 ${g0}...</div>` : ''}
                     </div>
+                    
+                    <div style="border-left:3px solid #c678dd; padding:12px 14px; background:rgba(198,120,221,0.06); border-radius:0 10px 10px 0; margin-bottom:14px;">
+                        <div style="font-size:12px; color:#c678dd; font-weight:600; margin-bottom:6px;">● 现在 · ${card1.name} ${card1.emoji}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.75); margin-bottom:8px;">💫 ${card1.summary || '你现在正经历的，是命运的馈赠'}</div>
+                        ${g1 ? `<div style="font-size:10px; color:rgba(255,255,255,0.55); line-height:1.8; padding-top:8px; border-top:1px solid rgba(198,120,221,0.15);">📖 ${g1}...</div>` : ''}
+                    </div>
+                    
+                    <div style="border-left:3px solid #43e97b; padding:12px 14px; background:rgba(67,233,123,0.06); border-radius:0 10px 10px 0; margin-bottom:18px;">
+                        <div style="font-size:12px; color:#43e97b; font-weight:600; margin-bottom:6px;">▶ 未来 · ${card2.name} ${card2.emoji}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.75); margin-bottom:8px;">💫 ${card2.summary || '未来已来，只是在路上'}</div>
+                        ${g2 ? `<div style="font-size:10px; color:rgba(255,255,255,0.55); line-height:1.8; padding-top:8px; border-top:1px solid rgba(67,233,123,0.15);">📖 ${g2}...</div>` : ''}
+                    </div>
+                    
+                    <div style="padding:14px; background:linear-gradient(135deg,rgba(67,233,123,0.15),rgba(56,181,201,0.1)); border-radius:12px; margin-bottom:18px; border:1px solid rgba(67,233,123,0.2);">
+                        <div style="font-size:10px; color:#43e97b; margin-bottom:8px; letter-spacing:1px;">TODAY'S SUMMARY · 今日概要</div>
+                        <div style="font-size:12px; color:rgba(255,255,255,0.9); line-height:1.9;">
+                            你的能量正从「<span style="color:#a78bfa;">${card0.keywords?.[0]||'起点'}</span>」流向「<span style="color:#c678dd;">${card1.keywords?.[0]||'过渡'}</span>」指向「<span style="color:#43e97b;">${card2.keywords?.[0]||'目标'}</span>」。<br><br>
+                            爱情<span style="color:#43e97b;">${loveLevel}</span> · 事业<span style="color:#43e97b;">${careerLevel}</span> · 健康<span style="color:#43e97b;">${healthLevel}</span> · 财运<span style="color:#43e97b;">${wealthLevel}</span><br><br>
+                            ${loveTotal >= 8 && careerTotal >= 8 ? '✨ 今天是一个综合能量很强的日子，适合全面推进。' : loveTotal >= 8 ? '💕 感情能量突出，适合处理关系议题。' : careerTotal >= 8 ? '💼 事业能量旺盛，适合开创新局面。' : '🌱 今天适合静心沉淀，等待更好的时机。'}
+                        </div>
+                    </div>
+                    
+                    <div style="padding:14px; background:rgba(0,0,0,0.15); border-radius:12px;">
+                        <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:12px; letter-spacing:1px;">ACTION GUIDE · 行动指南</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.85); line-height:2;">
+                            <span style="color:#a78bfa;">① 回看：</span>${card0.goldSentence || '承认过去的存在，感谢它带来的成长'}
+                        </div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.85); line-height:2;">
+                            <span style="color:#c678dd;">② 行动：</span>${card1.goldSentence || '全身心参与当下，不要旁观'}
+                        </div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.85); line-height:2;">
+                            <span style="color:#43e97b;">③ 放手：</span>${card2.goldSentence || '对结果保持开放，信任过程'}
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            `;
+            
+            // ========== 第三部分：AI深度解读按钮 ==========
+            html += `
+            <div style="text-align:center; margin-top:25px;">
+                <button onclick="requestSpreadAI()" style="padding:16px 40px; background:linear-gradient(135deg,#43e97b,#38b5c9); border:none; border-radius:30px; color:#000; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 4px 20px rgba(67,233,123,0.3);">
+                    🤖 AI深度解读
+                </button>
+            </div>
+            `;
+            
+            html += '</div>';
+            
+            resultDiv.innerHTML = html;
+            document.getElementById('spreadResetBtn').style.display = 'block';
+        }
+        
+        function requestSpreadAI() {
+            const resultDiv = document.getElementById('spreadResult');
+            
+            // 保存当前三牌阵内容
+            const cardsHtml = resultDiv.innerHTML;
+            
+            // 显示加载状态
+            resultDiv.innerHTML = cardsHtml + `
+                <div id="aiLoading" style="text-align:center; padding:25px; margin-top:20px;">
+                    <div style="font-size:16px; color:#43e97b; margin-bottom:12px;">🤖 小七正在解读三牌能量...</div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.5);">探索过去、现在、未来的能量联系</div>
                 </div>
             `;
             
-            document.getElementById('spreadResetBtn').style.display = 'block';
+            // 构建更详细的三牌阵信息
+            const cardsInfo = spreadCards.map((card, i) => {
+                const pos = ['过去', '现在', '未来'][i];
+                const loveScore = card.love ? card.love.score : 0;
+                const careerScore = card.career ? card.career.score : 0;
+                const healthScore = card.health ? card.health.score : 0;
+                const wealthScore = card.wealth ? card.wealth.score : 0;
+                return `${pos}：「${card.name}」${card.emoji} | 关键词: ${card.keywords ? card.keywords.join(', ') : '无'} | 爱情:${loveScore}★ 事业:${careerScore}★ 健康:${healthScore}★ 财运:${wealthScore}★ | 解读: ${card.summary || card.meaning || ''}`;
+            }).join('\n');
+            
+            const prompt = `你是塔罗占卜师，请深度解读三牌阵的能量关系。
+
+三牌阵：
+${cardsInfo}
+
+请从以下角度进行综合分析：
+1. 【能量流分析】过去牌如何影响现在牌，现在牌又如何指向未来牌？三张牌之间的能量是如何传递的？
+2. 【核心主题】这三张牌共同揭示了什么核心主题或生命课题？
+3. 【爱情维度】如果涉及感情，三张牌展示了感情发展的什么阶段和可能的结果？
+4. 【事业/财运】工作或财务方面可能会经历怎样的变化？
+5. 【行动建议】基于牌面能量，应该如何把握当下、创造理想未来？
+
+请用温暖而有洞察力的语气回答，语言要优美流畅。`;
+            
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `message=${encodeURIComponent(prompt)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                const loadingEl = document.getElementById('aiLoading');
+                if (loadingEl) loadingEl.remove();
+                
+                resultDiv.innerHTML = cardsHtml + `
+                    <div style="padding:25px; background:linear-gradient(135deg,rgba(67,233,123,0.12),rgba(139,92,246,0.12)); border-radius:20px; margin-top:25px; border:1px solid rgba(67,233,123,0.25); max-width:600px; margin-left:auto; margin-right:auto;">
+                        <div style="font-size:16px; font-weight:600; color:#43e97b; margin-bottom:18px; text-align:center;">✨ 三牌能量深度解读 ✨</div>
+                        <div style="font-size:13px; line-height:2.2; color:rgba(255,255,255,0.9); white-space:pre-wrap;">${data.reply || '小七暂时无法回应，请稍后再试。'}</div>
+                    </div>
+                `;
+            })
+            .catch(err => {
+                const loadingEl = document.getElementById('aiLoading');
+                if (loadingEl) loadingEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff6b6b;">❌ 网络波动，请稍后重试</div>';
+            });
         }
         
         document.getElementById('spreadResetBtn').addEventListener('click', () => {
