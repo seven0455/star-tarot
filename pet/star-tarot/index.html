@@ -805,16 +805,18 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         
         for (let i = 0; i < 3; i++) {
             document.getElementById(`spreadCard${i}`).addEventListener('click', function() {
-                if (spreadCount > i) return;
+                // 已经抽过的不能再点
+                if (spreadCards[i]) return;
                 
                 const card = getRandomCard();
                 spreadCards[i] = card;
-                spreadCount = i + 1;
                 
                 this.classList.add('revealed');
                 this.innerHTML = `<span class="spread-emoji">${card.emoji || '🃏'}</span><span class="spread-name">${card.name.split(' ')[0]}</span>`;
                 
-                if (spreadCount === 3) {
+                // 检查是否三张都抽完了
+                const filledCount = spreadCards.filter(c => c).length;
+                if (filledCount === 3) {
                     showSpreadResult();
                 }
             });
