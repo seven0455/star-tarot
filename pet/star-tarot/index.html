@@ -769,7 +769,21 @@
             // 隐藏AI区域
             document.getElementById('aiResponse').classList.remove('show');
             document.getElementById('aiLoading').classList.remove('show');
+            
+            // 保存单张牌到历史
+            saveDailyToHistory(card);
         });
+        
+        function saveDailyToHistory(card) {
+            const historyKey = getDailyHistoryKey();
+            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            history.unshift({
+                card: card,
+                timestamp: Date.now()
+            });
+            history = history.slice(0, 20);
+            localStorage.setItem(historyKey, JSON.stringify(history));
+        }
         
         function toggleCard() {
             if (dailyResult.classList.contains('show')) {
@@ -852,6 +866,10 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             return 'tarot_history_' + currentUser;
         }
         
+        function getDailyHistoryKey() {
+            return 'tarot_daily_history_' + currentUser;
+        }
+        
         function addToHistory(cards) {
             const historyKey = getHistoryKey();
             let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
@@ -905,44 +923,67 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         }
         
         function loadAndShowHistory() {
-            const historyKey = getHistoryKey();
-            const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            const spreadHistory = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
+            const dailyHistory = JSON.parse(localStorage.getItem(getDailyHistoryKey()) || '[]');
             const historyDiv = document.getElementById('historyContainer');
             if (!historyDiv) return;
             
-            if (history.length === 0) {
+            if (spreadHistory.length === 0 && dailyHistory.length === 0) {
                 historyDiv.innerHTML = '<div style="text-align:center; padding:30px; color:rgba(255,255,255,0.4); font-size:13px;">暂无抽牌记录</div>';
                 return;
             }
             
             let html = '<div style="padding:15px;">';
-            history.forEach((item, index) => {
-                const date = new Date(item.timestamp);
+            
+            // 合并所有历史并按时间排序
+            const allHistory = [];
+            spreadHistory.forEach(item => allHistory.push({ type: 'spread', data: item }));
+            dailyHistory.forEach(item => allHistory.push({ type: 'daily', data: item }));
+            allHistory.sort((a, b) => b.data.timestamp - a.data.timestamp);
+            
+            allHistory.slice(0, 15).forEach((item, index) => {
+                const date = new Date(item.data.timestamp);
                 const dateStr = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                const c0 = item.cards[0], c1 = item.cards[1], c2 = item.cards[2];
-                html += `
-                    <div style="padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:12px; cursor:pointer; border-left:3px solid #9d4edd;" onclick="loadHistoryItem(${index})">
-                        <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📅 ${dateStr}</div>
-                        <div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:8px;">
-                            <div style="flex:1; text-align:center;">
-                                <div style="font-size:20px;">${c0.emoji}</div>
-                                <div style="font-size:10px; color:#a78bfa;">过去</div>
-                                <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c0.name.split(' ')[0]}</div>
-                            </div>
-                            <div style="flex:1; text-align:center;">
-                                <div style="font-size:20px;">${c1.emoji}</div>
-                                <div style="font-size:10px; color:#c678dd;">现在</div>
-                                <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c1.name.split(' ')[0]}</div>
-                            </div>
-                            <div style="flex:1; text-align:center;">
-                                <div style="font-size:20px;">${c2.emoji}</div>
-                                <div style="font-size:10px; color:#43e97b;">未来</div>
-                                <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c2.name.split(' ')[0]}</div>
+                
+                if (item.type === 'spread') {
+                    const c0 = item.data.cards[0], c1 = item.data.cards[1], c2 = item.data.cards[2];
+                    html += `
+                        <div style="padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:12px; cursor:pointer; border-left:3px solid #9d4edd;" onclick="loadHistoryItem(${index})">
+                            <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📅 ${dateStr} <span style="margin-left:6px; padding:2px 6px; background:rgba(157,78,221,0.2); border-radius:4px; font-size:10px;">三牌阵</span></div>
+                            <div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:8px;">
+                                <div style="flex:1; text-align:center;">
+                                    <div style="font-size:20px;">${c0.emoji}</div>
+                                    <div style="font-size:10px; color:#a78bfa;">过去</div>
+                                    <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c0.name.split(' ')[0]}</div>
+                                </div>
+                                <div style="flex:1; text-align:center;">
+                                    <div style="font-size:20px;">${c1.emoji}</div>
+                                    <div style="font-size:10px; color:#c678dd;">现在</div>
+                                    <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c1.name.split(' ')[0]}</div>
+                                </div>
+                                <div style="flex:1; text-align:center;">
+                                    <div style="font-size:20px;">${c2.emoji}</div>
+                                    <div style="font-size:10px; color:#43e97b;">未来</div>
+                                    <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c2.name.split(' ')[0]}</div>
+                                </div>
                             </div>
                         </div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.5);">点击查看完整解读</div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    const card = item.data.card;
+                    html += `
+                        <div style="padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:12px; cursor:pointer; border-left:3px solid #e94560;" onclick="loadDailyHistoryItem(${index})">
+                            <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📅 ${dateStr} <span style="margin-left:6px; padding:2px 6px; background:rgba(233,69,96,0.2); border-radius:4px; font-size:10px;">单张牌</span></div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="font-size:36px;">${card.emoji || '🃏'}</div>
+                                <div>
+                                    <div style="font-size:14px; color:rgba(255,255,255,0.9); margin-bottom:4px;">${card.name}</div>
+                                    <div style="font-size:11px; color:rgba(255,255,255,0.5);">${card.coreEnergy || card.meaning || ''}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             });
             html += '</div>';
             historyDiv.innerHTML = html;
@@ -961,7 +1002,69 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 });
                 // 恢复结果
                 showSpreadResult();
+                // 切换到三牌阵tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('[data-tab="spread"]').classList.add('active');
+                document.getElementById('dailySection').classList.remove('active');
+                document.getElementById('spreadSection').classList.add('active');
                 // 关闭历史弹窗
+                closeHistoryModal();
+            }
+        }
+        
+        function loadDailyHistoryItem(index) {
+            const historyKey = getDailyHistoryKey();
+            const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            if (history[index]) {
+                const card = history[index].card;
+                dailyCardData = card;
+                
+                // 更新牌面
+                document.getElementById('cardPreview').textContent = card.emoji || '🃏';
+                document.getElementById('resultEmoji').textContent = card.emoji || '🃏';
+                document.getElementById('dailyName').textContent = card.name;
+                document.getElementById('dailyKeywords').innerHTML = (card.keywords || []).map(k => '<span class="keyword">' + k + '</span>').join('');
+                
+                if (card.summary) {
+                    document.getElementById('dailySummary').textContent = card.summary;
+                    document.getElementById('dailySummary').style.display = 'block';
+                    document.getElementById('dailyCore').textContent = card.coreEnergy;
+                    document.getElementById('dailyGuidance').innerHTML = (card.guidance || '').replace(/\n/g, '<br>');
+                    
+                    if (card.love) document.getElementById('loveScore').textContent = '★'.repeat(card.love.score) + '☆'.repeat(5 - card.love.score);
+                    if (card.career) document.getElementById('careerScore').textContent = '★'.repeat(card.career.score) + '☆'.repeat(5 - card.career.score);
+                    if (card.health) document.getElementById('healthScore').textContent = '★'.repeat(card.health.score) + '☆'.repeat(5 - card.health.score);
+                    if (card.wealth) document.getElementById('wealthScore').textContent = '★'.repeat(card.wealth.score) + '☆'.repeat(5 - card.wealth.score);
+                    
+                    if (card.luckyNumber) {
+                        document.getElementById('luckyNumber').textContent = card.luckyNumber;
+                        document.getElementById('luckyColor').textContent = card.luckyColor;
+                        document.getElementById('luckyDirection').textContent = card.luckyDirection;
+                        document.getElementById('luckyTips').style.display = 'flex';
+                    }
+                    
+                    if (card.goldSentence) {
+                        document.getElementById('goldSentence').textContent = card.goldSentence;
+                        document.getElementById('goldSentence').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('dailySummary').style.display = 'none';
+                    document.getElementById('dailyCore').textContent = card.meaning || '';
+                    document.getElementById('dailyGuidance').textContent = '';
+                    document.getElementById('luckyTips').style.display = 'none';
+                    document.getElementById('goldSentence').style.display = 'none';
+                }
+                
+                document.getElementById('dailyResult').classList.add('show');
+                document.getElementById('dailyCard').style.display = 'none';
+                document.getElementById('dailyDrawBtn').textContent = '🔄 重新抽取';
+                
+                // 切换到每日抽牌tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('[data-tab="daily"]').classList.add('active');
+                document.getElementById('dailySection').classList.add('active');
+                document.getElementById('spreadSection').classList.remove('active');
+                
                 closeHistoryModal();
             }
         }
