@@ -62,6 +62,14 @@ def find_card_by_name(name):
         if name_clean in chinese_name or chinese_name in name_clean:
             return card_id, card_data
     
+    # 模糊匹配 - 只输入单个词如"力量"时
+    if len(name_clean) <= 4:
+        for card_id, card_data in TAROT_DB.items():
+            card_name = card_data['name']
+            # 直接用牌名检查是否包含输入词
+            if name_clean in card_name:
+                return card_id, card_data
+    
     return None, None
 
 def extract_three_cards(message):
@@ -191,17 +199,21 @@ class TarotsHandler(SimpleHTTPRequestHandler):
             if '过去：' in message and '现在：' in message and '未来：' in message:
                 reading = generate_three_card_reading_v4(message)
             else:
-                # 单张牌解读
-                card_name = "塔罗牌"
-                if '塔罗牌「' in message:
+                # 单张牌解读 - 多种格式兼容
+                card_name = None
+                
+                # 格式1: 塔罗牌「xxx」
+                if not card_name and '塔罗牌「' in message:
                     try:
                         start = message.find('塔罗牌「') + 4
                         end = message.find('」', start)
                         if end > start:
-                            card_name = message[start:end]
+                            card_name = message[start:end].strip()
                     except:
                         pass
-                elif '牌名：' in message:
+                
+                # 格式2: 牌名：xxx
+                if not card_name and '牌名：' in message:
                     try:
                         start = message.find('牌名：') + 3
                         end = message.find('\n', start)
@@ -210,6 +222,43 @@ class TarotsHandler(SimpleHTTPRequestHandler):
                     except:
                         pass
                 
+                # 格式3: 用户抽到的牌是：「xxx」
+                if not card_name and '用户抽到的牌是：' in message:
+                    try:
+                        start = message.find('用户抽到的牌是：') + 8
+                        end = message.find('」', start)
+                        marker = message.find('（', start)
+                        if marker > start and marker < end:
+                            end = marker
+                        if end > start:
+                            card_name = message[start:end].strip()
+                    except:
+                        pass
+                
+                # 格式4: 牌是：「xxx」（xxx）
+                if not card_name and '牌是：' in message:
+                    try:
+                        start = message.find('牌是：') + 3
+                        end = message.find('）', start)
+                        marker = message.find('（', start)
+                        if marker > start and marker < end:
+                            end = marker
+                        if end > start:
+                            card_name = message[start:end].strip()
+                    except:
+                        pass
+                
+                # 格式5: 「xxx」直接提取（兜底）
+                if not card_name:
+                    match = re.search(r'「([^」]+)」', message)
+                    if match:
+                        potential = match.group(1).strip()
+                        # 验证是否是塔罗牌关键词
+                        keywords = ['力量', '愚者', '魔术师', '女祭司', '皇后', '皇帝', '教皇', '恋人', '战车', '命运', '正义', '吊人', '死神', '节制', '恶魔', '塔', '星星', '月亮', '太阳', '审判', '世界', '权杖', '圣杯', '宝剑', '星币', '金币']
+                        if any(k in potential for k in keywords):
+                            card_name = potential
+                
+                card_name = card_name or "塔罗牌"
                 reading = generate_single_reading(card_name)
             
             self.send_response(200)
