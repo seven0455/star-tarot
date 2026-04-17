@@ -1020,9 +1020,17 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             // 保存当前三牌阵内容
             const cardsHtml = resultDiv.innerHTML;
             
-            // 显示加载状态（紧凑）
-            resultDiv.innerHTML = `
-                <div style="text-align:center; padding:30px;">
+            // 在结果div后面添加一个专门的AI解读容器
+            let aiContainer = document.getElementById('aiResultContainer');
+            if (!aiContainer) {
+                aiContainer = document.createElement('div');
+                aiContainer.id = 'aiResultContainer';
+                resultDiv.parentNode.appendChild(aiContainer);
+            }
+            
+            // 显示加载状态（不覆盖原有内容）
+            aiContainer.innerHTML = `
+                <div style="text-align:center; padding:30px; margin-top:20px;">
                     <div style="font-size:16px; color:#43e97b; margin-bottom:10px;">🤖 小七正在解读...</div>
                     <div style="font-size:12px; color:rgba(255,255,255,0.5);">探索三牌能量联系</div>
                 </div>
@@ -1065,14 +1073,14 @@ ${cardsInfo}
                     .replace(/[,，]+。/g, '。')
                     .trim();
                 
-                // 追加AI解读，而不是替换全部内容
+                // 追加AI解读到专门的容器，不影响原有内容
                 const aiSection = `
-                    <div style="margin-top:20px; padding:18px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:20px auto 0 auto;">
+                    <div style="padding:18px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:20px auto 0 auto;">
                         <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:14px; text-align:center;">✨ AI深度解读</div>
                         <div style="font-size:12px; line-height:1.8; color:rgba(255,255,255,0.9);">${reply}</div>
                     </div>
                 `;
-                resultDiv.innerHTML += aiSection;
+                aiContainer.innerHTML = aiSection;
             })
             .catch(err => {
                 const loadingEl = document.getElementById('aiLoading');
