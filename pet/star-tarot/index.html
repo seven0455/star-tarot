@@ -497,6 +497,57 @@
             background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
             margin: 25px 0;
         }
+        
+        /* 冥想呼吸动画 */
+        @keyframes meditationPulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.6;
+                box-shadow: 0 0 30px rgba(157, 78, 221, 0.3);
+            }
+            50% { 
+                transform: scale(1.15);
+                opacity: 1;
+                box-shadow: 0 0 60px rgba(157, 78, 221, 0.6);
+            }
+        }
+        
+        /* 粒子动画 */
+        .particle-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes particleFloat {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translateY(-20px) scale(1.5);
+                opacity: 1;
+            }
+        }
+        
+        .draw-phase {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -521,11 +572,41 @@
         
         <!-- 每日抽牌 -->
         <div class="daily-section active" id="dailySection">
-            <div class="draw-area">
-                <div class="tarot-card" id="dailyCard" onclick="toggleCard()">
-                    <span class="card-emoji" id="cardPreview">🃏</span>
+            
+            <!-- 冥想阶段 -->
+            <div class="draw-phase" id="dailyPhaseMeditation">
+                <div class="draw-area" style="padding: 60px 20px;">
+                    <div style="text-align:center;">
+                        <div style="font-size:16px; color:rgba(255,255,255,0.9); margin-bottom:30px;">🔮 在心中默念你的问题</div>
+                        <div id="dailyMeditationOrb" style="width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, rgba(157,78,221,0.8) 0%, rgba(139,92,246,0.3) 50%, transparent 70%); margin:0 auto 30px; animation:meditationPulse 3s ease-in-out infinite;"></div>
+                        <div style="font-size:14px; color:rgba(255,255,255,0.6); margin-bottom:40px;">让星辰指引你...</div>
+                        <button class="draw-btn" onclick="dailyStartQuestion()" style="padding:14px 40px;">✨ 我已准备好</button>
+                    </div>
                 </div>
-                <button class="draw-btn" id="dailyDrawBtn">抽取今日塔罗</button>
+            </div>
+            
+            <!-- 提问阶段 -->
+            <div class="draw-phase" id="dailyPhaseQuestion" style="display:none;">
+                <div class="draw-area" style="padding: 40px 20px;">
+                    <div style="text-align:center;">
+                        <div style="font-size:16px; color:rgba(255,255,255,0.9); margin-bottom:20px;">🌟 请说出你的问题</div>
+                        <textarea id="dailyQuestion" placeholder="例如：今日运势如何？" style="width:90%; max-width:400px; padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:12px; color:#fff; font-size:14px; resize:none; outline:none;" rows="2"></textarea>
+                        <div style="margin-top:20px;">
+                            <button class="draw-btn" onclick="dailyStartDraw()" style="padding:14px 40px;">🌙 开始抽取</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 抽牌阶段 -->
+            <div class="draw-phase" id="dailyPhaseDraw" style="display:none;">
+                <div class="draw-area">
+                    <div id="dailyQuestionDisplay" style="text-align:center; font-size:13px; color:#c678dd; margin-bottom:15px; display:none;"></div>
+                    <div class="tarot-card" id="dailyCard" onclick="toggleCard()">
+                        <span class="card-emoji" id="cardPreview">🃏</span>
+                    </div>
+                    <button class="draw-btn" id="dailyDrawBtn">抽取今日塔罗</button>
+                </div>
             </div>
             
             <div class="result-card" id="dailyResult">
@@ -732,8 +813,43 @@
         
         // 每日抽牌
         let dailyCardData = null;
+        let dailyUserQuestion = '';
+        
+        // 单张牌流程：第一步-准备好后进入提问
+        function dailyStartQuestion() {
+            document.getElementById('dailyPhaseMeditation').style.display = 'none';
+            document.getElementById('dailyPhaseQuestion').style.display = 'block';
+        }
+        
+        // 单张牌流程：第二步-提问后进入抽牌
+        function dailyStartDraw() {
+            dailyUserQuestion = document.getElementById('dailyQuestion').value.trim();
+            if (!dailyUserQuestion) {
+                alert('请先输入你的问题');
+                return;
+            }
+            document.getElementById('dailyPhaseQuestion').style.display = 'none';
+            document.getElementById('dailyPhaseDraw').style.display = 'block';
+            document.getElementById('dailyQuestionDisplay').textContent = '❓ ' + dailyUserQuestion;
+            document.getElementById('dailyQuestionDisplay').style.display = 'block';
+        }
         
         dailyDrawBtn.addEventListener('click', () => {
+            // 如果已显示结果，点击"重新抽取"应重置整个流程
+            if (dailyResult.classList.contains('show') && dailyDrawBtn.textContent.includes('重新')) {
+                dailyResult.classList.remove('show');
+                document.getElementById('dailyPhaseDraw').style.display = 'none';
+                document.getElementById('dailyPhaseMeditation').style.display = 'block';
+                document.getElementById('dailyQuestion').value = '';
+                document.getElementById('cardPreview').textContent = '🃏';
+                dailyDrawBtn.textContent = '抽取今日塔罗';
+                dailyUserQuestion = '';
+                dailyCardData = null;
+                document.getElementById('aiResponse').classList.remove('show');
+                document.getElementById('aiLoading').classList.remove('show');
+                return;
+            }
+            
             const card = getRandomCard();
             dailyCardData = card;
             
@@ -799,18 +915,22 @@
             document.getElementById('aiResponse').classList.remove('show');
             document.getElementById('aiLoading').classList.remove('show');
             
-            // 保存单张牌到历史
-            saveDailyToHistory(card);
+            // 注意：单张牌历史只在AI解读完成后保存
         });
         
         function saveDailyToHistory(card) {
             const historyKey = getDailyHistoryKey();
             let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            // 构建记录（包含问题和AI回复）
+            const aiReply = document.getElementById('aiResponse').textContent || '';
             history.unshift({
                 card: card,
+                question: dailyUserQuestion,
+                aiReply: aiReply,
                 timestamp: Date.now()
             });
-            history = history.slice(0, 20);
+            // 只保留最近3条（滚动保存）
+            history = history.slice(0, 3);
             localStorage.setItem(historyKey, JSON.stringify(history));
         }
         
@@ -837,15 +957,17 @@
                 const res = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `message=请深度解读塔罗牌「${dailyCardData.name}」的含义。
-                    
+                    body: `message=你是塔罗占卜师，请深度解读这张牌。
+
+用户的问题：${dailyUserQuestion}
+
 牌名：${dailyCardData.name}
-关键词：${dailyCardData.keywords.join('、')}
+关键词：${dailyCardData.keywords ? dailyCardData.keywords.join('、') : ''}
 ${dailyCardData.summary ? '牌面含义：' + dailyCardData.summary : ''}
 ${dailyCardData.coreEnergy ? '核心能量：' + dailyCardData.coreEnergy : ''}
 ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<[^>]*>/g, '') : ''}
 
-请给出有诗意的分析，给出对这个位置的具体建议。`
+请结合用户的问题「${dailyUserQuestion}」，给出有针对性的深度解读和具体建议。`
                 });
                 
                 const data = await res.json();
@@ -857,6 +979,9 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             btn.disabled = false;
             loading.classList.remove('show');
             response.classList.add('show');
+            
+            // AI解读完成后保存单张牌历史
+            saveDailyToHistory(dailyCardData);
         });
         
         // ========== localStorage 持久化（按用户区分）==========
