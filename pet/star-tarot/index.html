@@ -953,6 +953,67 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             document.getElementById('spreadResetBtn').style.display = 'block';
         }
         
+        // 格式化AI回复文本
+        function formatAIReply(text) {
+            // 清理文本
+            text = text.replace(/\n{3,}/g, '\n\n').replace(/。。/g, '。').replace(/[,，]+。/g, '。').trim();
+            
+            // 尝试识别标题和内容
+            const sections = [];
+            const lines = text.split('\n');
+            let currentTitle = '';
+            let currentContent = [];
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                
+                // 检测是否是标题行（以【】或数字+。或特定关键词开头）
+                const titleMatch = line.match(/^[【\[]([^】\]]+)[】\]]/);
+                if (titleMatch) {
+                    // 保存上一个section
+                    if (currentTitle || currentContent.length) {
+                        sections.push({
+                            title: currentTitle || '解读',
+                            content: currentContent.join(' ').substring(0, 300)
+                        });
+                    }
+                    currentTitle = titleMatch[1];
+                    currentContent = [line.replace(/^[【\[][^】\]]+[】\]]\s*/, '')];
+                } else if (line.match(/^[0-9]+[.、]\s*/) && line.length < 30) {
+                    // 数字编号的标题
+                    if (currentTitle || currentContent.length) {
+                        sections.push({
+                            title: currentTitle || '解读',
+                            content: currentContent.join(' ').substring(0, 300)
+                        });
+                    }
+                    currentTitle = line.replace(/^[0-9]+[.、]\s*/, '');
+                    currentContent = [];
+                } else {
+                    currentContent.push(line);
+                }
+            }
+            
+            // 保存最后一个section
+            if (currentTitle || currentContent.length) {
+                sections.push({
+                    title: currentTitle || '深度解读',
+                    content: currentContent.join(' ').substring(0, 400)
+                });
+            }
+            
+            // 如果没有识别出结构，按默认方式处理
+            if (sections.length === 0) {
+                sections.push({
+                    title: '解读',
+                    content: text.substring(0, 400)
+                });
+            }
+            
+            return sections.slice(0, 5); // 最多5个section
+        }
+        
         function requestSpreadAI() {
             const resultDiv = document.getElementById('spreadResult');
             
@@ -998,10 +1059,21 @@ ${cardsInfo}
             })
             .then(res => res.json())
             .then(data => {
+                const reply = data.reply || '小七暂时无法回应，请稍后再试。';
+                // 解析AI文本，分成段落
+                const sections = formatAIReply(reply);
+                
+                let sectionsHtml = sections.map(s => `
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:10px; color:#43e97b; margin-bottom:4px;">${s.title}</div>
+                        <div style="font-size:11px; line-height:1.7; color:rgba(255,255,255,0.85);">${s.content}</div>
+                    </div>
+                `).join('');
+                
                 resultDiv.innerHTML = `
                     <div style="padding:18px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:0 auto;">
-                        <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:10px; text-align:center;">✨ AI深度解读</div>
-                        <div style="font-size:12px; line-height:1.6; color:rgba(255,255,255,0.9); white-space:pre-wrap; text-align:left;">${(data.reply || '小七暂时无法回应，请稍后再试。').replace(/\n\n+/g, '\n').trim()}</div>
+                        <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:14px; text-align:center;">✨ AI深度解读</div>
+                        ${sectionsHtml}
                     </div>
                 `;
             })
