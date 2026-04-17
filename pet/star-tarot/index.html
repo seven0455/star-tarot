@@ -540,6 +540,11 @@
             }
         }
         
+        @keyframes breathText {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        
         .draw-phase {
             animation: fadeIn 0.5s ease;
         }
@@ -578,9 +583,30 @@
                 <div class="draw-area" style="padding: 60px 20px;">
                     <div style="text-align:center;">
                         <div style="font-size:16px; color:rgba(255,255,255,0.9); margin-bottom:30px;">🔮 在心中默念你的问题</div>
-                        <div id="dailyMeditationOrb" style="width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, rgba(157,78,221,0.8) 0%, rgba(139,92,246,0.3) 50%, transparent 70%); margin:0 auto 30px; animation:meditationPulse 3s ease-in-out infinite;"></div>
+                        <div class="particle-container" id="meditationOrb">
+                            <div class="orb" style="width:100px; height:100px; border-radius:50%; background:radial-gradient(circle, rgba(157,78,221,0.9) 0%, rgba(139,92,246,0.4) 50%, transparent 70%); margin:0 auto; animation:meditationPulse 3s ease-in-out infinite; position:relative; z-index:2;"></div>
+                        </div>
                         <div style="font-size:14px; color:rgba(255,255,255,0.6); margin-bottom:40px;">让星辰指引你...</div>
-                        <button class="draw-btn" onclick="dailyStartQuestion()" style="padding:14px 40px;">✨ 我已准备好</button>
+                        <button class="draw-btn" onclick="startMeditation()" style="padding:14px 40px;">✨ 我已准备好</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 冥想动画阶段 -->
+            <div class="draw-phase" id="dailyPhaseAnimating" style="display:none;">
+                <div class="draw-area" style="padding: 60px 20px;">
+                    <div style="text-align:center;">
+                        <div class="particle-container" style="width:150px; height:150px;">
+                            <div class="orb" style="width:100px; height:100px; border-radius:50%; background:radial-gradient(circle, rgba(157,78,221,0.9) 0%, rgba(139,92,246,0.4) 50%, transparent 70%); margin:0 auto; animation:meditationPulse 3s ease-in-out infinite; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2;"></div>
+                            <div class="particle" style="top:10%; left:50%; animation-delay:0s;"></div>
+                            <div class="particle" style="top:30%; left:85%; animation-delay:0.5s;"></div>
+                            <div class="particle" style="top:70%; left:85%; animation-delay:1s;"></div>
+                            <div class="particle" style="top:90%; left:50%; animation-delay:1.5s;"></div>
+                            <div class="particle" style="top:70%; left:15%; animation-delay:2s;"></div>
+                            <div class="particle" style="top:30%; left:15%; animation-delay:2.5s;"></div>
+                        </div>
+                        <div style="font-size:18px; color:rgba(255,255,255,0.9); margin-bottom:20px; animation:breathText 3s ease-in-out infinite;">专注...深呼吸...</div>
+                        <div style="font-size:14px; color:rgba(255,255,255,0.5);">即将进入抽牌...</div>
                     </div>
                 </div>
             </div>
@@ -690,9 +716,36 @@
             <div class="spread-phase" id="spreadPhaseMeditation">
                 <div style="text-align:center; padding: 60px 20px;">
                     <div style="font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 30px;">🔮 在心中默念你的问题</div>
-                    <div id="meditationAnimation" style="font-size: 80px; margin-bottom: 30px;">🌙</div>
+                    <div class="particle-container" style="width:150px; height:150px; margin:0 auto 30px;">
+                        <div class="orb" style="width:100px; height:100px; border-radius:50%; background:radial-gradient(circle, rgba(157,78,221,0.9) 0%, rgba(139,92,246,0.4) 50%, transparent 70%); animation:meditationPulse 3s ease-in-out infinite; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2;"></div>
+                        <div class="particle" style="top:10%; left:50%; animation-delay:0s;"></div>
+                        <div class="particle" style="top:30%; left:85%; animation-delay:0.5s;"></div>
+                        <div class="particle" style="top:70%; left:85%; animation-delay:1s;"></div>
+                        <div class="particle" style="top:90%; left:50%; animation-delay:1.5s;"></div>
+                        <div class="particle" style="top:70%; left:15%; animation-delay:2s;"></div>
+                        <div class="particle" style="top:30%; left:15%; animation-delay:2.5s;"></div>
+                    </div>
                     <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 40px;">让星辰指引你...</div>
-                    <button onclick="startQuestion()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">✨ 我已准备好</button>
+                    <button onclick="spreadStartMeditation()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">✨ 我已准备好</button>
+                </div>
+            </div>
+            
+            <!-- 冥想动画阶段 -->
+            <div class="spread-phase" id="spreadPhaseAnimating" style="display:none;">
+                <div style="text-align:center; padding: 60px 20px;">
+                    <div class="particle-container" style="width:180px; height:180px; margin:0 auto;">
+                        <div class="orb" style="width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, rgba(157,78,221,0.9) 0%, rgba(139,92,246,0.4) 50%, transparent 70%); animation:meditationPulse 3s ease-in-out infinite; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2;"></div>
+                        <div class="particle" style="top:5%; left:50%; animation-delay:0s;"></div>
+                        <div class="particle" style="top:25%; left:90%; animation-delay:0.4s;"></div>
+                        <div class="particle" style="top:50%; left:95%; animation-delay:0.8s;"></div>
+                        <div class="particle" style="top:75%; left:90%; animation-delay:1.2s;"></div>
+                        <div class="particle" style="top:95%; left:50%; animation-delay:1.6s;"></div>
+                        <div class="particle" style="top:75%; left:10%; animation-delay:2s;"></div>
+                        <div class="particle" style="top:50%; left:5%; animation-delay:2.4s;"></div>
+                        <div class="particle" style="top:25%; left:10%; animation-delay:2.8s;"></div>
+                    </div>
+                    <div style="font-size: 18px; color: rgba(255,255,255,0.9); margin-bottom: 20px; animation:breathText 3s ease-in-out infinite;">专注...深呼吸...</div>
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.5);">即将进入抽牌...</div>
                 </div>
             </div>
             
@@ -702,7 +755,7 @@
                     <div style="font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 20px;">🌟 现在，请说出你的问题</div>
                     <textarea id="spreadQuestion" placeholder="例如：我最近的工作发展会如何？" style="width:90%; max-width:400px; padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:12px; color:#fff; font-size:14px; resize:none; outline:none;" rows="2"></textarea>
                     <div style="margin-top: 20px;">
-                        <button onclick="startDraw()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">🌙 开始抽牌</button>
+                        <button onclick="spreadStartDraw()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">🌙 开始抽牌</button>
                     </div>
                 </div>
             </div>
@@ -815,13 +868,19 @@
         let dailyCardData = null;
         let dailyUserQuestion = '';
         
-        // 单张牌流程：第一步-准备好后进入提问
-        function dailyStartQuestion() {
+        // 第一步：点击"我已准备好" → 开始冥想动画
+        function startMeditation() {
             document.getElementById('dailyPhaseMeditation').style.display = 'none';
-            document.getElementById('dailyPhaseQuestion').style.display = 'block';
+            document.getElementById('dailyPhaseAnimating').style.display = 'block';
+            
+            // 3秒后进入提问阶段
+            setTimeout(() => {
+                document.getElementById('dailyPhaseAnimating').style.display = 'none';
+                document.getElementById('dailyPhaseQuestion').style.display = 'block';
+            }, 3000);
         }
         
-        // 单张牌流程：第二步-提问后进入抽牌
+        // 第二步：输入问题后进入抽牌
         function dailyStartDraw() {
             dailyUserQuestion = document.getElementById('dailyQuestion').value.trim();
             if (!dailyUserQuestion) {
@@ -941,7 +1000,7 @@
             }
         }
         
-        // AI解读
+        // AI解读 - 重点：针对用户的问题深度解读
         document.getElementById('aiBtn').addEventListener('click', async () => {
             if (!dailyCardData) return;
             
@@ -953,21 +1012,61 @@
             loading.classList.add('show');
             response.classList.remove('show');
             
+            // 构建针对问题的深度解读prompt
+            const question = dailyUserQuestion || '今日运势如何？';
+            const cardName = dailyCardData.name;
+            const keywords = dailyCardData.keywords ? dailyCardData.keywords.join('、') : '';
+            const summary = dailyCardData.summary || dailyCardData.meaning || '';
+            const coreEnergy = dailyCardData.coreEnergy || '';
+            const guidance = dailyCardData.guidance ? dailyCardData.guidance.replace(/<[^>]*>/g, '') : '';
+            
+            // 运势评分
+            const loveInfo = dailyCardData.love ? `爱情运势：${dailyCardData.love.score}★（${dailyCardData.love.tip}）` : '';
+            const careerInfo = dailyCardData.career ? `事业运势：${dailyCardData.career.score}★（${dailyCardData.career.tip}）` : '';
+            const healthInfo = dailyCardData.health ? `健康运势：${dailyCardData.health.score}★（${dailyCardData.health.tip}）` : '';
+            const wealthInfo = dailyCardData.wealth ? `财富运势：${dailyCardData.wealth.score}★（${dailyCardData.wealth.tip}）` : '';
+            
+            const prompt = `你是塔罗占卜师。用户抽到了「${cardName}」，现在请你针对用户的问题进行深度解读。
+
+【用户的问题】
+${question}
+
+【抽到的牌】
+牌名：${cardName}
+关键词：${keywords}
+牌面含义：${summary}
+核心能量：${coreEnergy}
+${guidance}
+
+【运势参考】
+${loveInfo}
+${careerInfo}
+${healthInfo}
+${wealthInfo}
+
+请按照以下结构进行解读：
+
+1. 【牌面直答】结合「${question}」，这张牌给出了怎样的直接回答？
+
+2. 【能量分析】这张牌的核心能量「${coreEnergy}」如何对应用户的问题？
+
+3. 【分维度指引】
+   ${loveInfo ? '- 感情/爱情方面：' : ''}
+   ${careerInfo ? '- 事业/工作方面：' : ''}
+   ${healthInfo ? '- 健康/身心方面：' : ''}
+   ${wealthInfo ? '- 财富/财运方面：' : ''}
+
+4. 【行动建议】针对用户的问题，应该如何把握今天的机会？
+
+5. 【今日关键词】一句话概括今日核心主题
+
+请用温暖而有洞察力的语气，结合用户的问题给出具体、可操作的建议，不要泛泛而谈。`;
+            
             try {
                 const res = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `message=你是塔罗占卜师，请深度解读这张牌。
-
-用户的问题：${dailyUserQuestion}
-
-牌名：${dailyCardData.name}
-关键词：${dailyCardData.keywords ? dailyCardData.keywords.join('、') : ''}
-${dailyCardData.summary ? '牌面含义：' + dailyCardData.summary : ''}
-${dailyCardData.coreEnergy ? '核心能量：' + dailyCardData.coreEnergy : ''}
-${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<[^>]*>/g, '') : ''}
-
-请结合用户的问题「${dailyUserQuestion}」，给出有针对性的深度解读和具体建议。`
+                    body: `message=${encodeURIComponent(prompt)}`
                 });
                 
                 const data = await res.json();
@@ -1245,14 +1344,20 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         // 冥想功能
         let userQuestion = '';
         
-        // 第一步：用户准备好了，进入问题输入
-        function startQuestion() {
+        // 三牌阵：第一步-准备好后开始冥想动画
+        function spreadStartMeditation() {
             document.getElementById('spreadPhaseMeditation').style.display = 'none';
-            document.getElementById('spreadPhaseQuestion').style.display = 'block';
+            document.getElementById('spreadPhaseAnimating').style.display = 'block';
+            
+            // 3秒后进入提问阶段
+            setTimeout(() => {
+                document.getElementById('spreadPhaseAnimating').style.display = 'none';
+                document.getElementById('spreadPhaseQuestion').style.display = 'block';
+            }, 3000);
         }
         
-        // 第二步：输入问题后，开始抽牌
-        function startDraw() {
+        // 三牌阵：第二步-提问后开始抽牌
+        function spreadStartDraw() {
             userQuestion = document.getElementById('spreadQuestion').value.trim();
             if (!userQuestion) {
                 alert('请先输入你的问题');
@@ -1571,31 +1676,45 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 </div>
             `;
             
-            // 构建更详细的三牌阵信息（包含用户问题）
+            // 构建三牌阵信息（包含完整数据）
             const cardsInfo = spreadCards.map((card, i) => {
                 const pos = ['过去', '现在', '未来'][i];
-                const loveScore = card.love ? card.love.score : 0;
-                const careerScore = card.career ? card.career.score : 0;
-                const healthScore = card.health ? card.health.score : 0;
-                const wealthScore = card.wealth ? card.wealth.score : 0;
-                return `${pos}：「${card.name}」${card.emoji} | 关键词: ${card.keywords ? card.keywords.join(', ') : '无'} | 爱情:${loveScore}★ 事业:${careerScore}★ 健康:${healthScore}★ 财运:${wealthScore}★ | 解读: ${card.summary || card.meaning || ''}`;
-            }).join('\n');
+                const love = card.love ? `爱情${card.love.score}★(${card.love.tip})` : '';
+                const career = card.career ? `事业${card.career.score}★(${card.career.tip})` : '';
+                const health = card.health ? `健康${card.health.score}★(${card.health.tip})` : '';
+                const wealth = card.wealth ? `财富${card.wealth.score}★(${card.wealth.tip})` : '';
+                const scores = [love, career, health, wealth].filter(Boolean).join(' | ');
+                return `${pos}：「${card.name}」${card.emoji}\n关键词：${card.keywords ? card.keywords.join('、') : ''}\n牌意：${card.summary || card.meaning || ''}\n运势：${scores}`;
+            }).join('\n\n');
             
-            const prompt = `你是塔罗占卜师，请深度解读三牌阵的能量关系。
+            const question = userQuestion || '我的运势如何？';
+            
+            const prompt = `你是塔罗占卜师。用户进行了三牌阵抽牌，请针对用户的问题进行深度解读。
 
-用户的问题：${userQuestion}
+【用户的问题】
+${question}
 
-三牌阵：
+【三牌阵】
 ${cardsInfo}
 
-请根据用户的问题，结合牌面进行深度分析：
-1. 【能量流分析】过去牌如何影响现在牌，现在牌又如何指向未来牌？与用户问题有何关联？
-2. 【核心主题】这三张牌共同揭示了什么核心主题？
-3. 【问题回应】针对用户的问题"${userQuestion}"，牌面给出了怎样的指引？
-4. 【爱情/事业/财运】在工作、感情、财务方面可能会有什么变化？
-5. 【行动建议】基于牌面能量和用户问题，应该如何把握当下、创造理想未来？
+请按照以下结构进行解读：
 
-请用温暖而有洞察力的语气回答，语言要优美流畅，针对用户的问题给出具体建议。`;
+1. 【牌面直答】针对「${question}」，过去-现在-未来三张牌分别给出了怎样的回答？
+
+2. 【能量流分析】过去牌如何影响现在牌，现在牌又如何指向未来牌？这三张牌之间的能量是如何传递的？
+
+3. 【核心主题】这三张牌共同揭示了什么核心主题？与用户的问题有何关联？
+
+4. 【分维度指引】
+   - 感情/爱情方面：
+   - 事业/工作方面：
+   - 财富/财运方面：
+
+5. 【行动建议】基于牌面能量，针对用户的问题，应该如何把握当下、创造理想未来？
+
+6. 【一句话总结】用一句话概括对用户问题的回答
+
+请用温暖而有洞察力的语气，结合用户的问题给出具体、可操作的建议。`;
             
             fetch('/chat', {
                 method: 'POST',
