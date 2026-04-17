@@ -971,16 +971,20 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                     `;
                 } else {
                     const card = item.data.card;
+                    // 获取guidance预览（去掉标题部分）
+                    const guidancePreview = card.guidance ? card.guidance.replace(/^[\s\S]*?】/, '').substring(0, 60) + '...' : (card.summary || card.meaning || '');
                     html += `
                         <div style="padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:12px; cursor:pointer; border-left:3px solid #e94560;" onclick="loadDailyHistoryItem(${index})">
                             <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📅 ${dateStr} <span style="margin-left:6px; padding:2px 6px; background:rgba(233,69,96,0.2); border-radius:4px; font-size:10px;">单张牌</span></div>
-                            <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;">
                                 <div style="font-size:36px;">${card.emoji || '🃏'}</div>
-                                <div>
+                                <div style="flex:1;">
                                     <div style="font-size:14px; color:rgba(255,255,255,0.9); margin-bottom:4px;">${card.name}</div>
-                                    <div style="font-size:11px; color:rgba(255,255,255,0.5);">${card.coreEnergy || card.meaning || ''}</div>
+                                    <div style="font-size:11px; color:#a78bfa; margin-bottom:6px;">⚡ ${card.coreEnergy || card.meaning || ''}</div>
+                                    <div style="font-size:11px; color:rgba(255,255,255,0.6); line-height:1.5;">${guidancePreview}</div>
                                 </div>
                             </div>
+                            <div style="font-size:10px; color:rgba(255,255,255,0.35); text-align:right;">点击查看完整解读</div>
                         </div>
                     `;
                 }
