@@ -902,14 +902,15 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         function addToHistory(cards, question, aiReply) {
             const historyKey = getHistoryKey();
             let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-            // 只保留最近3条
-            history = history.slice(0, 2);
+            // 添加新记录到最前面
             history.unshift({
                 cards: cards,
                 question: question,
                 aiReply: aiReply,
                 timestamp: Date.now()
             });
+            // 只保留最近3条（滚动保存）
+            history = history.slice(0, 3);
             localStorage.setItem(historyKey, JSON.stringify(history));
         }
         
