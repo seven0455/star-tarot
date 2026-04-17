@@ -1,17 +1,42 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # 星契塔罗服务器
+# 使用 tarot_db.py 中的真实塔罗数据
+
 import urllib.parse
 import json
 import re
 import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-import os
 PORT = 8086
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+# 导入塔罗数据库
+from tarot_db import TAROT_DB
+
+def find_card_by_name(name):
+    """根据牌名在数据库中查找塔罗牌"""
+    # 清理牌名（去除emoji等）
+    name_clean = name.strip()
+    
+    # 直接匹配
+    for card_id, card_data in TAROT_DB.items():
+        if card_data['name'].startswith(name_clean) or name_clean in card_data['name']:
+            return card_id, card_data
+    
+    # 模糊匹配（只看中文名或关键词）
+    for card_id, card_data in TAROT_DB.items():
+        # 检查是否包含中文名的一部分
+        for keyword in card_data['keywords']:
+            if keyword in name_clean:
+                return card_id, card_data
+    
+    return None, None
+
 def generate_three_card_reading(message):
-    """生成三牌阵的AI深度解读"""
+    """生成三牌阵的AI深度解读（使用真实数据库）"""
+    
     # 解析三张牌的信息
     cards = []
     positions = ['过去', '现在', '未来']
@@ -24,58 +49,43 @@ def generate_three_card_reading(message):
         pos_pattern = f"{pos}：「(.+?)」"
         match = re.search(pos_pattern, message)
         if match:
-            card_info['name'] = match.group(1)
+            card_name = match.group(1)
+            card_info['name'] = card_name
+            
+            # 尝试从数据库查找
+            card_id, db_card = find_card_by_name(card_name)
+            if db_card:
+                card_info['emoji'] = db_card['emoji']
+                card_info['keywords'] = db_card['keywords']
+                card_info['summary'] = db_card['summary']
+                card_info['coreEnergy'] = db_card['coreEnergy']
+                card_info['guidance'] = db_card['guidance']
+                card_info['goldSentence'] = db_card['goldSentence']
+                card_info['db_source'] = card_id
+            else:
+                # 没找到，使用默认值
+                card_info['emoji'] = '🃏'
+                card_info['keywords'] = ['未知']
+                card_info['summary'] = '待发现的牌面'
+                card_info['coreEnergy'] = '未知'
+                card_info['guidance'] = '这张牌的能量还未被解读...'
+                card_info['goldSentence'] = '静待揭示...'
         else:
             card_info['name'] = '未知牌'
-        
-        # 提取emoji
-        emoji_match = re.search(f"{pos}：.+?([\U0001F300-\U0001F9FF])", message)
-        if emoji_match:
-            card_info['emoji'] = emoji_match.group(1)
-        else:
             card_info['emoji'] = '🃏'
-        
-        # 提取关键词
-        kw_match = re.search(f"{pos}.+?关键词: (.+?)\| ", message)
-        if kw_match:
-            card_info['keywords'] = kw_match.group(1).split(', ')
-        else:
-            card_info['keywords'] = []
-        
-        # 提取爱情、事业、健康、财运评分
-        love_match = re.search(f"爱情:(\d)★", message)
-        career_match = re.search(f"事业:(\d)★", message)
-        health_match = re.search(f"健康:(\d)★", message)
-        wealth_match = re.search(f"财运:(\d)★", message)
-        
-        card_info['love'] = int(love_match.group(1)) if love_match else 0
-        card_info['career'] = int(career_match.group(1)) if career_match else 0
-        card_info['health'] = int(health_match.group(1)) if health_match else 0
-        card_info['wealth'] = int(wealth_match.group(1)) if wealth_match else 0
-        
-        # 提取解读
-        meaning_match = re.search(f"解读: (.+?)(?:\n|$)", message)
-        if meaning_match:
-            card_info['meaning'] = meaning_match.group(1)
-        else:
-            card_info['meaning'] = ''
+            card_info['keywords'] = ['未知']
+            card_info['summary'] = '未能获取牌面信息'
+            card_info['coreEnergy'] = '未知'
+            card_info['guidance'] = '请重新抽取塔罗牌...'
+            card_info['goldSentence'] = '未知'
         
         cards.append(card_info)
     
-    # 计算能量总分
-    love_total = sum(c['love'] for c in cards)
-    career_total = sum(c['career'] for c in cards)
-    health_total = sum(c['health'] for c in cards)
-    wealth_total = sum(c['wealth'] for c in cards)
+    # 计算能量主题
+    energy_themes = [c['keywords'][0] if c['keywords'] else '未知' for c in cards]
+    energy_theme = ' → '.join(energy_themes)
     
-    # 生成能量主题
-    themes = []
-    for c in cards:
-        if c['keywords']:
-            themes.append(c['keywords'][0])
-    energy_theme = ' → '.join(themes) if themes else '待发现'
-    
-    # 分析能量流向
+    # 生成能量流向
     energy_flow = f"""
 <span style="color:{cards[0]['color']};">◀ {cards[0]['name']}</span> 
 　　能量根源：你携带的内在资源
@@ -87,20 +97,20 @@ def generate_three_card_reading(message):
 　　能量指向：即将显现的结果
 """
     
-    # 能量分析
-    love_analysis = f"""你的爱情能量正经历「{'高' if love_total >= 10 else '中' if love_total >= 6 else '低'}强度」的流动。{'这张牌阵显示了感情发展的关键时刻，无论单身还是有伴，都能从中获得启示。' if love_total >= 8 else '感情方面需要更多耐心和理解，让自己和对方都有成长的空间。'}"""
-    
-    career_analysis = f"""事业能量显示为{'积极' if career_total >= 10 else '平稳' if career_total >= 6 else '需要调整'}状态。{'现在是你展现实力、迈向新阶段的良机。' if career_total >= 8 else '或许需要等待更好的时机，但持续的准备不会白费。'}"""
-    
-    # 行动建议
-    actions = f"""1. 【接纳过去】{cards[0]['keywords'][0] if cards[0]['keywords'] else cards[0]['name']}的能量不是负担，而是根基。承认它，感谢它。
+    # 整合三张牌的解读
+    readings = []
+    for c in cards:
+        readings.append(f"""<span style="color:{c['color']};">【{c['name']}】</span>
 
-2. 【专注当下】{cards[1]['keywords'][0] if cards[1]['keywords'] else cards[1]['name']}正在你生命中展开。带着觉知参与其中，而非被动反应。
+核心能量：{c['coreEnergy']}
+关键词：{' · '.join(c['keywords'])}
 
-3. 【开放结果】{cards[2]['keywords'][0] if cards[2]['keywords'] else cards[2]['name']}是可能的未来，但不是唯一的结局。你的每一个选择都在塑造它。
+{c['guidance']}
 
-4. 【整合能量】三张牌形成一个完整的转化圈——过去滋养现在，现在创造未来。"""
+✨ {c['goldSentence']}
+""")
     
+    # 整合解读
     reading = f"""
 ✨ 【三牌阵深度解读】✨
 
@@ -115,87 +125,71 @@ def generate_three_card_reading(message):
 {energy_flow}
 
 ━━━━━━━━━━━━━━━━━━━━
-📊 维度能量解读
+📖 三牌详细解读
 ━━━━━━━━━━━━━━━━━━━━
 
-💕 爱情：{'★' * round(love_total/3)}{'☆' * (5-round(love_total/3))} ({love_total}/15)
-　　{love_analysis}
-
-💼 事业：{'★' * round(career_total/3)}{'☆' * (5-round(career_total/3))} ({career_total}/15)
-　　{career_analysis}
-
-💪 健康：{'★' * round(health_total/3)}{'☆' * (5-round(health_total/3))} ({health_total}/15)
-　　健康能量{'较强' if health_total >= 10 else '中等' if health_total >= 6 else '需要关注'}，记得给自己足够的休息和滋养。
-
-💰 财运：{'★' * round(wealth_total/3)}{'☆' * (5-round(wealth_total/3))} ({wealth_total}/15)
-　　财运能量{'显示机遇' if wealth_total >= 10 else '保持平稳' if wealth_total >= 6 else '暂时需要保守'}，但记住：真正的财富是创造价值的能力。
+{readings[0]}
 
 ━━━━━━━━━━━━━━━━━━━━
-🔮 三牌核心洞察
+
+{readings[1]}
+
 ━━━━━━━━━━━━━━━━━━━━
 
-<span style="color:{cards[0]['color']};">【{cards[0]['name']}】</span>揭示了你的内在资源——{cards[0]['meaning'] or '那些你已经拥有的力量'}
-
-<span style="color:{cards[1]['color']};">【{cards[1]['name']}】</span>呈现当前的挑战——{cards[1]['meaning'] or '你正面临的生命课题'}
-
-<span style="color:{cards[2]['color']};">【{cards[2]['name']}】</span>指向可能的结果——{cards[2]['meaning'] or '如果你选择正确道路的奖赏'}
-
-这三张牌共同在说：你的过去不是限制，而是弹药；你的现在不是困境，而是舞台；你的未来不是命运，而是召唤。
+{readings[2]}
 
 ━━━━━━━━━━━━━━━━━━━━
 💡 整合行动指南
 ━━━━━━━━━━━━━━━━━━━━
-{actions}
+
+1. 【接纳过去】{cards[0]['name']}的能量不是负担，而是根基。
+   思考：这个能量如何在你生命中支持你？
+
+2. 【专注当下】{cards[1]['name']}正在你生命中展开。
+   行动：今天如何更好地参与这个转化过程？
+
+3. 【开放结果】{cards[2]['name']}是可能的未来。
+   态度：保持开放，但不为结果而焦虑。
+
 ━━━━━━━━━━━━━━━━━━━━
 
 🌟 记住：塔罗不是预言，而是镜像。
 它照见的是你内在已经存在的答案。
-愿这份解读成为你今天行动的燃料。
 
 有问题随时召唤小七！🐼
 """
     return reading.strip()
 
 def generate_ai_reading(card_name, guidance, summary, core_energy, keywords):
-    """基于深度guidance生成AI解读"""
+    """生成单张牌的AI解读（使用真实数据库）"""
     
-    # 清理guidance中的特殊字符
-    if guidance:
-        guidance = guidance.strip()
-        # 保持格式但确保可读性
-        guidance = re.sub(r'\n{3,}', '\n\n', guidance)
+    # 尝试从数据库查找
+    card_id, db_card = find_card_by_name(card_name)
+    
+    if db_card:
+        card_name = db_card['name']
+        guidance = db_card['guidance']
+        summary = db_card['summary']
+        core_energy = db_card['coreEnergy']
+        keywords = db_card['keywords']
+        gold_sentence = db_card['goldSentence']
+        emoji = db_card['emoji']
     else:
-        guidance = f"""
-🌊 【关于今天，你要知道的事】
-
-今天你抽到了 {card_name}。
-
-这张牌在告诉你： Life is happening for you, not to you.
-不管今天发生什么，都是你成长的一部分。
-
-【小七的解读】
-
-牌面虽然没有给出具体的指引，但记住：重要的不是你抽到什么牌，
-而是你如何解读这张牌，以及如何把这份解读应用在你的生活中。
-
-【今日课题】
-
-找一个今天你遇到的挑战，换一个角度看待它。
-不是"为什么发生在我身上"，而是"这件事想教我什么"。
-"""
+        gold_sentence = '等待揭示...'
+        emoji = '🃏'
     
     reading = f"""
-✨ 【{card_name}】✨
+✨ 【{card_name}】{emoji}
 
 ━━━━━━━━━━━━━━━━━━━━
 📖 牌面解读
 ━━━━━━━━━━━━━━━━━━━━
 
-{summary if summary else '今日的能量正在引导你...'}
+{summary}
 
-⚡ 核心能量：{core_energy if core_energy else '等待被发现'}
+⚡ 核心能量：{core_energy}
 
-🔮 关键词：{' · '.join(keywords) if keywords else '待发现'}
+🔮 关键词：{' · '.join(keywords)}
 
 ━━━━━━━━━━━━━━━━━━━━
 🔮 小七深度解读
@@ -207,7 +201,7 @@ def generate_ai_reading(card_name, guidance, summary, core_energy, keywords):
 💫 今日金句
 ━━━━━━━━━━━━━━━━━━━━
 
-「{summary if summary else '保持内心的光，黑暗终将消散。'}」
+「{gold_sentence}」
 
 ━━━━━━━━━━━━━━━━━━━━
 
@@ -228,90 +222,27 @@ class TarotsHandler(SimpleHTTPRequestHandler):
             data = urllib.parse.parse_qs(post_data)
             message = data.get('message', [''])[0]
             
-            # 从消息中提取牌信息
-            card_name = "塔罗牌"
-            guidance = ""
-            summary = ""
-            core_energy = ""
-            keywords = []
-            
-            # 提取牌名
-            if '塔罗牌「' in message:
-                try:
-                    start = message.find('塔罗牌「') + 4
-                    end = message.find('」', start)
-                    if end > start:
-                        card_name = message[start:end]
-                except:
-                    pass
-            elif '牌名：' in message:
-                try:
-                    start = message.find('牌名：') + 3
-                    end = message.find('\n', start)
-                    if end > start:
-                        card_name = message[start:end].strip()
-                except:
-                    pass
-            
-            # 提取关键词
-            if '关键词：' in message:
-                try:
-                    start = message.find('关键词：') + 4
-                    end = message.find('\n', start)
-                    if end > start:
-                        kw_text = message[start:end].strip()
-                        if '、' in kw_text:
-                            keywords = [k.strip() for k in kw_text.split('、') if k.strip()]
-                except:
-                    pass
-            
-            # 提取牌面含义
-            if '牌面含义：' in message:
-                try:
-                    start = message.find('牌面含义：') + 5
-                    # 找下一个\n之前的内容
-                    remaining = message[start:]
-                    end = remaining.find('\n')
-                    if end > 0:
-                        summary = remaining[:end].strip()
-                    else:
-                        summary = remaining.strip()
-                except:
-                    pass
-            
-            # 提取核心能量
-            if '核心能量：' in message:
-                try:
-                    start = message.find('核心能量：') + 5
-                    remaining = message[start:]
-                    end = remaining.find('\n')
-                    if end > 0:
-                        core_energy = remaining[:end].strip()
-                    else:
-                        core_energy = remaining.strip()
-                except:
-                    pass
-            
-            # 提取今日指引 - 这是最重要的部分
-            if '今日指引：' in message:
-                try:
-                    start = message.find('今日指引：') + 5
-                    # 今日指引可能很长，找下一个"请给出"之前的内容
-                    end = message.find('请给出', start)
-                    if end > start:
-                        guidance = message[start:end].strip()
-                    else:
-                        # 如果没找到，就取到消息结尾
-                        guidance = message[start:].strip()
-                    # 清理HTML标签
-                    guidance = re.sub(r'<[^>]+>', '', guidance)
-                except:
-                    pass
-            
             # 检测是否是三牌阵请求
-            if '过去：' in message and '现在：' in message and '未来：' in message and '请从以下角度' in message:
+            if '过去：' in message and '现在：' in message and '未来：' in message:
                 reading = generate_three_card_reading(message)
             else:
+                # 单张牌解读
+                card_name = "塔罗牌"
+                guidance = ""
+                summary = ""
+                core_energy = ""
+                keywords = []
+                
+                # 提取牌名
+                if '塔罗牌「' in message:
+                    try:
+                        start = message.find('塔罗牌「') + 4
+                        end = message.find('」', start)
+                        if end > start:
+                            card_name = message[start:end]
+                    except:
+                        pass
+                
                 reading = generate_ai_reading(card_name, guidance, summary, core_energy, keywords)
             
             self.send_response(200)
@@ -331,6 +262,7 @@ class TarotsHandler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     print(f"星契塔罗服务器启动成功！")
+    print(f"塔罗数据库已加载：{len(TAROT_DB)} 张牌")
     print(f"访问: http://localhost:{PORT}")
     server = HTTPServer(('0.0.0.0', PORT), TarotsHandler)
     server.serve_forever()
