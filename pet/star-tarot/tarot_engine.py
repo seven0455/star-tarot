@@ -3,15 +3,15 @@ from tarot_db import TAROT_DB
 
 def generate_three_card_comprehensive(cards):
     """
-    生成三牌阵的深度综合解读（神秘风格）
+    生成三牌阵的深度综合解读（神秘风格，修复布局问题）
     """
     if len(cards) < 3:
         return "<p>错误：需要三张牌。</p>"
 
     # 神秘风格配色
     colors = {
-        'bg': '#0f0f1a',           # 深邃夜空
-        'card_bg': '#1a1a2e',      # 卡片背景
+        'bg': 'transparent',           # 透明背景，融入页面
+        'card_bg': 'rgba(26, 26, 46, 0.95)',      # 卡片背景
         'accent1': '#9d4edd',      # 神秘紫
         'accent2': '#ff6b6b',      # 玫瑰红
         'accent3': '#4ecdc4',      # 星光青
@@ -49,76 +49,76 @@ def generate_three_card_comprehensive(cards):
     action1 = f"【拥抱{cards[1]['name']}】{cards[1]['guidance'][:80]}..."
     action2 = f"【期待{cards[2]['name']}】{cards[2]['guidance'][:80]}..."
 
-    # 神秘风格 HTML
+    # 修复：使用block显示，不覆盖其他内容
     html = f"""
-<div style="font-family: 'Georgia', 'Times New Roman', serif; max-width: 700px; margin: 0 auto; padding: 30px 20px; background: {colors['bg']}; color: {colors['text']}; min-height: 100vh;">
-
+<div style="display: block; width: 100%; max-width: 700px; margin: 20px auto; padding: 0; font-family: 'Georgia', 'Times New Roman', serif; color: {colors['text']}; line-height: 1.6;">
+    
     <!-- 神秘标题 -->
-    <div style="text-align: center; margin-bottom: 35px;">
-        <div style="font-size: 24px; color: {colors['gold']}; letter-spacing: 4px; margin-bottom: 10px;">✧ ✦ ✧</div>
-        <div style="font-size: 14px; color: {colors['text_dim']}; letter-spacing: 6px; text-transform: uppercase;">Tarot Reading</div>
-        <div style="font-size: 20px; color: {colors['accent1']}; margin-top: 15px; font-weight: 300;">{overview}</div>
+    <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: {colors['card_bg']}; border-radius: 16px; border: 1px solid {colors['accent1']}33;">
+        <div style="font-size: 18px; color: {colors['gold']}; letter-spacing: 4px; margin-bottom: 8px;">✧ ✦ ✧</div>
+        <div style="font-size: 12px; color: {colors['text_dim']}; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 12px;">Tarot Reading</div>
+        <div style="font-size: 16px; color: {colors['accent1']}; font-weight: normal;">{overview}</div>
     </div>
 
     <!-- 三牌展示 -->
-    <div style="display: flex; justify-content: center; align-items: stretch; gap: 15px; margin-bottom: 35px;">
-        <div style="flex: 1; text-align: center; padding: 25px 15px; background: linear-gradient(135deg, {colors['card_bg']} 0%, #252545 100%); border-radius: 16px; border: 1px solid {colors['accent1']}33; box-shadow: 0 8px 32px rgba(157, 78, 221, 0.2);">
-            <div style="font-size: 48px; margin-bottom: 12px; filter: drop-shadow(0 0 10px {colors['accent1']}66);">{cards[0]['emoji']}</div>
-            <div style="font-size: 16px; color: {colors['accent1']}; margin-bottom: 6px;">{cards[0]['name']}</div>
-            <div style="font-size: 11px; color: {colors['text_dim']}; letter-spacing: 2px;">THE PAST</div>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; padding: 20px; background: {colors['card_bg']}; border-radius: 16px; border: 1px solid {colors['accent1']}22;">
+        <div style="flex: 1; text-align: center; padding: 15px 8px;">
+            <div style="font-size: 36px; margin-bottom: 8px;">{cards[0]['emoji']}</div>
+            <div style="font-size: 13px; color: {colors['accent1']}; margin-bottom: 4px;">{cards[0]['name']}</div>
+            <div style="font-size: 10px; color: {colors['text_dim']}; letter-spacing: 1px;">PAST</div>
         </div>
-        <div style="display: flex; align-items: center; font-size: 24px; color: {colors['gold']};">⟡</div>
-        <div style="flex: 1; text-align: center; padding: 25px 15px; background: linear-gradient(135deg, {colors['card_bg']} 0%, #252545 100%); border-radius: 16px; border: 1px solid {colors['accent2']}33; box-shadow: 0 8px 32px rgba(255, 107, 107, 0.2);">
-            <div style="font-size: 48px; margin-bottom: 12px; filter: drop-shadow(0 0 10px {colors['accent2']}66);">{cards[1]['emoji']}</div>
-            <div style="font-size: 16px; color: {colors['accent2']}; margin-bottom: 6px;">{cards[1]['name']}</div>
-            <div style="font-size: 11px; color: {colors['text_dim']}; letter-spacing: 2px;">THE PRESENT</div>
+        <div style="font-size: 18px; color: {colors['gold']}; padding: 0 5px;">⟡</div>
+        <div style="flex: 1; text-align: center; padding: 15px 8px;">
+            <div style="font-size: 36px; margin-bottom: 8px;">{cards[1]['emoji']}</div>
+            <div style="font-size: 13px; color: {colors['accent2']}; margin-bottom: 4px;">{cards[1]['name']}</div>
+            <div style="font-size: 10px; color: {colors['text_dim']}; letter-spacing: 1px;">PRESENT</div>
         </div>
-        <div style="display: flex; align-items: center; font-size: 24px; color: {colors['gold']};">⟡</div>
-        <div style="flex: 1; text-align: center; padding: 25px 15px; background: linear-gradient(135deg, {colors['card_bg']} 0%, #252545 100%); border-radius: 16px; border: 1px solid {colors['accent3']}33; box-shadow: 0 8px 32px rgba(78, 205, 196, 0.2);">
-            <div style="font-size: 48px; margin-bottom: 12px; filter: drop-shadow(0 0 10px {colors['accent3']}66);">{cards[2]['emoji']}</div>
-            <div style="font-size: 16px; color: {colors['accent3']}; margin-bottom: 6px;">{cards[2]['name']}</div>
-            <div style="font-size: 11px; color: {colors['text_dim']}; letter-spacing: 2px;">THE FUTURE</div>
+        <div style="font-size: 18px; color: {colors['gold']}; padding: 0 5px;">⟡</div>
+        <div style="flex: 1; text-align: center; padding: 15px 8px;">
+            <div style="font-size: 36px; margin-bottom: 8px;">{cards[2]['emoji']}</div>
+            <div style="font-size: 13px; color: {colors['accent3']}; margin-bottom: 4px;">{cards[2]['name']}</div>
+            <div style="font-size: 10px; color: {colors['text_dim']}; letter-spacing: 1px;">FUTURE</div>
         </div>
     </div>
 
-    <!-- 神秘分隔线 -->
-    <div style="text-align: center; margin-bottom: 30px; color: {colors['gold']}; letter-spacing: 8px; font-size: 12px;">✧ · ˚ ✦ · ˚ ✧</div>
+    <!-- 分隔线 -->
+    <div style="text-align: center; margin-bottom: 20px; color: {colors['gold']}; letter-spacing: 6px; font-size: 10px;">✧ · ˚ ✦ · ˚ ✧</div>
 
     <!-- 关系分析 -->
-    <div style="margin-bottom: 25px; padding: 22px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['accent1']}; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="font-size: 12px; color: {colors['accent1']}; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;">✧ Relationship Analysis</div>
-        <div style="font-size: 14px; color: {colors['text_dim']}; line-height: 1.8;">{rel_analysis}</div>
+    <div style="margin-bottom: 15px; padding: 18px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['accent1']}; clear: both;">
+        <div style="font-size: 11px; color: {colors['accent1']}; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;">✧ Relationship</div>
+        <div style="font-size: 13px; color: {colors['text_dim']}; line-height: 1.7;">{rel_analysis}</div>
     </div>
 
     <!-- 能量流向 -->
-    <div style="margin-bottom: 25px; padding: 22px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['accent2']}; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="font-size: 12px; color: {colors['accent2']}; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;">⚡ Energy Flow</div>
-        <div style="font-size: 13px; color: {colors['text']}; line-height: 2; font-family: 'Georgia', serif;">{energy0}<br>{energy1}<br>{energy2}</div>
+    <div style="margin-bottom: 15px; padding: 18px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['accent2']}; clear: both;">
+        <div style="font-size: 11px; color: {colors['accent2']}; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;">⚡ Energy Flow</div>
+        <div style="font-size: 12px; color: {colors['text']}; line-height: 1.8;">{energy0}<br>{energy1}<br>{energy2}</div>
     </div>
 
     <!-- 综合解读 -->
-    <div style="margin-bottom: 25px; padding: 22px; background: linear-gradient(135deg, {colors['card_bg']} 0%, #1f1f35 100%); border-radius: 12px; border: 1px solid {colors['gold']}33; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="font-size: 12px; color: {colors['gold']}; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;">✧ The Reading</div>
-        <div style="font-size: 14px; color: {colors['text']}; line-height: 2; font-family: 'Georgia', serif; font-style: italic; white-space: pre-line;">{text}</div>
+    <div style="margin-bottom: 15px; padding: 18px; background: {colors['card_bg']}; border-radius: 12px; border: 1px solid {colors['gold']}33; clear: both;">
+        <div style="font-size: 11px; color: {colors['gold']}; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;">✧ The Reading</div>
+        <div style="font-size: 13px; color: {colors['text']}; line-height: 1.8; font-style: italic; white-space: pre-line;">{text}</div>
     </div>
 
     <!-- 维度分析 -->
-    <div style="margin-bottom: 25px; padding: 22px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['accent3']}; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="font-size: 12px; color: {colors['accent3']}; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;">🎯 Dimensions</div>
-        <div style="font-size: 12px; color: {colors['text_dim']}; line-height: 2.2; font-family: 'Georgia', serif;">❤️ {love}<br><br>💼 {work}<br><br>🏥 {health}<br><br>💰 {money}</div>
+    <div style="margin-bottom: 15px; padding: 18px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['accent3']}; clear: both;">
+        <div style="font-size: 11px; color: {colors['accent3']}; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;">🎯 Dimensions</div>
+        <div style="font-size: 12px; color: {colors['text_dim']}; line-height: 1.9;">❤️ {love}<br>💼 {work}<br>🏥 {health}<br>💰 {money}</div>
     </div>
 
     <!-- 行动指南 -->
-    <div style="margin-bottom: 25px; padding: 22px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['gold']}; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="font-size: 12px; color: {colors['gold']}; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;">💡 Guidance</div>
-        <div style="font-size: 13px; color: {colors['text']}; line-height: 2; font-family: 'Georgia', serif;">{action0}<br><br>{action1}<br><br>{action2}</div>
+    <div style="margin-bottom: 15px; padding: 18px; background: {colors['card_bg']}; border-radius: 12px; border-left: 3px solid {colors['gold']}; clear: both;">
+        <div style="font-size: 11px; color: {colors['gold']}; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;">💡 Guidance</div>
+        <div style="font-size: 12px; color: {colors['text']}; line-height: 1.8;">{action0}<br><br>{action1}<br><br>{action2}</div>
     </div>
 
     <!-- 底部金句 -->
-    <div style="text-align: center; margin-top: 35px; padding: 25px; background: linear-gradient(135deg, {colors['card_bg']} 0%, #252545 100%); border-radius: 16px; border: 1px solid {colors['gold']}44;">
-        <div style="font-size: 11px; color: {colors['text_dim']}; letter-spacing: 4px; margin-bottom: 15px; text-transform: uppercase;">✧ Today's Wisdom</div>
-        <div style="font-size: 16px; color: {colors['gold']}; font-style: italic; font-family: 'Georgia', serif;">"{cards[2]['goldSentence']}"</div>
-        <div style="margin-top: 15px; font-size: 16px; color: {colors['silver']};">🌙 ✦ ☀️</div>
+    <div style="text-align: center; margin-top: 20px; padding: 20px; background: {colors['card_bg']}; border-radius: 16px; border: 1px solid {colors['gold']}44; clear: both;">
+        <div style="font-size: 10px; color: {colors['text_dim']}; letter-spacing: 3px; margin-bottom: 12px; text-transform: uppercase;">✧ Today's Wisdom</div>
+        <div style="font-size: 14px; color: {colors['gold']}; font-style: italic;">"{cards[2]['goldSentence']}"</div>
+        <div style="margin-top: 12px; font-size: 14px; color: {colors['silver']};">🌙 ✦ ☀️</div>
     </div>
 
 </div>"""
