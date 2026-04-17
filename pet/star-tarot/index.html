@@ -509,6 +509,7 @@
             <p class="subtitle">探索命运的星辰密码，每一张牌都是你的故事</p>
             <div class="user-status" id="userStatus">
                 <span class="user-badge" id="userBadge">加载中...</span>
+                <span class="user-switch" id="historyBtn" onclick="showHistoryModal()">📜 历史</span>
                 <span class="user-switch" id="userSwitchBtn" onclick="switchUser()">切换用户</span>
             </div>
         </header>
@@ -840,10 +841,15 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             localStorage.setItem('tarot_current_user', userId);
             // 切换用户后，重新加载该用户的抽牌记录
             loadSpreadState();
+            loadAndShowHistory();
         }
         
         function getStorageKey() {
             return 'tarot_spread_' + currentUser;
+        }
+        
+        function getHistoryKey() {
+            return 'tarot_history_' + currentUser;
         }
         
         function saveSpreadState() {
@@ -853,6 +859,20 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 user: currentUser
             };
             localStorage.setItem(getStorageKey(), JSON.stringify(state));
+            // 保存到历史记录
+            addToHistory(spreadCards);
+        }
+        
+        function addToHistory(cards) {
+            const historyKey = getHistoryKey();
+            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            history.unshift({
+                cards: cards,
+                timestamp: Date.now()
+            });
+            // 只保留最近20条
+            history = history.slice(0, 20);
+            localStorage.setItem(historyKey, JSON.stringify(history));
         }
         
         function loadSpreadState() {
@@ -884,6 +904,60 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         
         function clearSpreadState() {
             localStorage.removeItem(getStorageKey());
+        }
+        
+        function loadAndShowHistory() {
+            const historyKey = getHistoryKey();
+            const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            const historyDiv = document.getElementById('historyContainer');
+            if (!historyDiv) return;
+            
+            if (history.length === 0) {
+                historyDiv.innerHTML = '<div style="text-align:center; padding:30px; color:rgba(255,255,255,0.4); font-size:13px;">暂无抽牌记录</div>';
+                return;
+            }
+            
+            let html = '<div style="padding:15px;">';
+            history.forEach((item, index) => {
+                const date = new Date(item.timestamp);
+                const dateStr = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const cardNames = item.cards.map(c => c.emoji + ' ' + c.name.split(' ')[0]).join(' → ');
+                html += `
+                    <div style="padding:12px; background:rgba(255,255,255,0.03); border-radius:10px; margin-bottom:10px; cursor:pointer;" onclick="loadHistoryItem(${index})">
+                        <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:6px;">${dateStr}</div>
+                        <div style="font-size:13px; color:rgba(255,255,255,0.8);">${cardNames}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            historyDiv.innerHTML = html;
+        }
+        
+        function loadHistoryItem(index) {
+            const historyKey = getHistoryKey();
+            const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            if (history[index]) {
+                spreadCards = history[index].cards;
+                // 恢复卡片显示
+                spreadCards.forEach((card, i) => {
+                    const cardEl = document.getElementById('spreadCard' + i);
+                    cardEl.classList.add('revealed');
+                    cardEl.innerHTML = '<span class="spread-emoji">' + (card.emoji || '🃏') + '</span><span class="spread-name">' + card.name.split(' ')[0] + '</span>';
+                });
+                // 恢复结果
+                showSpreadResult();
+                // 关闭历史弹窗
+                closeHistoryModal();
+            }
+        }
+        
+        function showHistoryModal() {
+            loadAndShowHistory();
+            document.getElementById('historyModal').style.display = 'block';
+        }
+        
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
         }
         
         // 页面加载时恢复状态
@@ -1241,6 +1315,24 @@ ${cardsInfo}
             const aiContainer = document.getElementById('aiResultContainer');
             if (aiContainer) aiContainer.innerHTML = '';
         });
+        
+        // ========== 历史记录弹窗 ==========
+        document.write(`
+        <div id="historyModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:1000; overflow-y:auto;">
+            <div style="max-width:500px; margin:40px auto; background:#1a1a2e; border-radius:16px; border:1px solid rgba(139,92,246,0.3); overflow:hidden;">
+                <div style="padding:20px; background:linear-gradient(135deg,#2d1b4e,#4a2c7a); display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:16px; font-weight:600; color:#fff;">📜 抽牌历史</div>
+                    <span onclick="closeHistoryModal()" style="cursor:pointer; font-size:24px; color:rgba(255,255,255,0.6); line-height:1;">&times;</span>
+                </div>
+                <div id="historyContainer" style="max-height:60vh; overflow-y:auto;"></div>
+            </div>
+        </div>
+        `);
+        
+        // 初始化时加载历史
+        if (currentUser && currentUser !== 'default') {
+            loadAndShowHistory();
+        }
     </script>
 </body>
 </html>
