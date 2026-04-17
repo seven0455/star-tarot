@@ -605,27 +605,28 @@
         <!-- 三牌阵 -->
         <div class="spread-section" id="spreadSection">
             
-            <!-- 问题输入阶段 -->
-            <div class="spread-phase" id="spreadPhaseQuestion">
+            <!-- 冥想阶段（第一步） -->
+            <div class="spread-phase" id="spreadPhaseMeditation">
+                <div style="text-align:center; padding: 60px 20px;">
+                    <div style="font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 30px;">🔮 在心中默念你的问题</div>
+                    <div id="meditationAnimation" style="font-size: 80px; margin-bottom: 30px;">🌙</div>
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 40px;">让星辰指引你...</div>
+                    <button onclick="startQuestion()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">✨ 我已准备好</button>
+                </div>
+            </div>
+            
+            <!-- 问题输入阶段（第二步） -->
+            <div class="spread-phase" id="spreadPhaseQuestion" style="display:none;">
                 <div style="text-align:center; padding: 20px 0;">
-                    <div style="font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 20px;">🔮 请在心中默念你的问题</div>
+                    <div style="font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 20px;">🌟 现在，请说出你的问题</div>
                     <textarea id="spreadQuestion" placeholder="例如：我最近的工作发展会如何？" style="width:90%; max-width:400px; padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:12px; color:#fff; font-size:14px; resize:none; outline:none;" rows="2"></textarea>
                     <div style="margin-top: 20px;">
-                        <button onclick="startMeditation()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">✨ 开始冥想</button>
+                        <button onclick="startDraw()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">🌙 开始抽牌</button>
                     </div>
                 </div>
             </div>
             
-            <!-- 冥想阶段 -->
-            <div class="spread-phase" id="spreadPhaseMeditation" style="display:none;">
-                <div style="text-align:center; padding: 60px 20px;">
-                    <div id="meditationAnimation" style="font-size: 60px; margin-bottom: 30px;">🌙</div>
-                    <div style="font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 15px;">专注你的问题...</div>
-                    <div style="font-size: 14px; color: rgba(255,255,255,0.5);">让宇宙的星辰指引你</div>
-                </div>
-            </div>
-            
-            <!-- 抽牌阶段 -->
+            <!-- 抽牌阶段（第三步） -->
             <div class="spread-phase" id="spreadPhaseDraw" style="display:none;">
                 <div style="text-align:center; margin-bottom: 20px;">
                     <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 10px;">你的问题：</div>
@@ -1117,48 +1118,29 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         
         // 冥想功能
         let userQuestion = '';
-        let meditationDone = false;
         
-        function startMeditation() {
+        // 第一步：用户准备好了，进入问题输入
+        function startQuestion() {
+            document.getElementById('spreadPhaseMeditation').style.display = 'none';
+            document.getElementById('spreadPhaseQuestion').style.display = 'block';
+        }
+        
+        // 第二步：输入问题后，开始抽牌
+        function startDraw() {
             userQuestion = document.getElementById('spreadQuestion').value.trim();
             if (!userQuestion) {
                 alert('请先输入你的问题');
                 return;
             }
             
-            // 显示冥想阶段
             document.getElementById('spreadPhaseQuestion').style.display = 'none';
-            document.getElementById('spreadPhaseMeditation').style.display = 'block';
+            document.getElementById('spreadPhaseDraw').style.display = 'block';
             document.getElementById('spreadQuestionDisplay').textContent = userQuestion;
-            
-            // 星辰动画
-            const meditationEl = document.getElementById('meditationAnimation');
-            const phases = ['🌙', '✨', '⭐', '🌟', '✨'];
-            let i = 0;
-            const animation = setInterval(() => {
-                meditationEl.textContent = phases[i % phases.length];
-                meditationEl.style.transform = 'scale(' + (1 + Math.sin(i * 0.5) * 0.2 + ')';
-                i++;
-            }, 800);
-            
-            // 3秒后进入抽牌阶段
-            setTimeout(() => {
-                clearInterval(animation);
-                document.getElementById('spreadPhaseMeditation').style.display = 'none';
-                document.getElementById('spreadPhaseDraw').style.display = 'block';
-                meditationDone = true;
-            }, 3000);
-        }
-        
-        function showPhase(phase) {
-            document.querySelectorAll('.spread-phase').forEach(p => p.style.display = 'none');
-            document.getElementById('spreadPhase' + phase).style.display = 'block';
         }
         
         function resetSpreadFlow() {
             // 重置整个流程
             userQuestion = '';
-            meditationDone = false;
             spreadCards = [];
             document.getElementById('spreadQuestion').value = '';
             document.getElementById('spreadResult').innerHTML = '';
@@ -1175,8 +1157,9 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             const aiContainer = document.getElementById('aiResultContainer');
             if (aiContainer) aiContainer.innerHTML = '';
             
-            // 回到问题阶段
-            showPhase('Question');
+            // 回到冥想阶段
+            document.querySelectorAll('.spread-phase').forEach(p => p.style.display = 'none');
+            document.getElementById('spreadPhaseMeditation').style.display = 'block';
         }
         function initApp() {
             const userId = getUserId();
