@@ -799,19 +799,51 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             response.classList.add('show');
         });
         
-        // ========== localStorage 持久化 ==========
-        const STORAGE_KEY = 'tarot_spread_state';
+        // ========== localStorage 持久化（按用户区分）==========
+        let currentUser = 'default';
+        
+        function getUserId() {
+            // 优先从URL参数获取用户名
+            const urlParams = new URLSearchParams(window.location.search);
+            const userParam = urlParams.get('user') || urlParams.get('name') || urlParams.get('id');
+            if (userParam) {
+                currentUser = userParam;
+                return currentUser;
+            }
+            // 其次从localStorage获取上次保存的用户名
+            const savedUser = localStorage.getItem('tarot_current_user');
+            if (savedUser) {
+                currentUser = savedUser;
+                return currentUser;
+            }
+            return null;
+        }
+        
+        function setUserId(userId) {
+            currentUser = userId;
+            localStorage.setItem('tarot_current_user', userId);
+            // 切换用户后，重新加载该用户的抽牌记录
+            loadSpreadState();
+        }
+        
+        function getStorageKey() {
+            return 'tarot_spread_' + currentUser;
+        }
         
         function saveSpreadState() {
             const state = {
                 spreadCards: spreadCards,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                user: currentUser
             };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            localStorage.setItem(getStorageKey(), JSON.stringify(state));
         }
         
         function loadSpreadState() {
-            const saved = localStorage.getItem(STORAGE_KEY);
+            const userId = getUserId();
+            if (!userId) return false;
+            
+            const saved = localStorage.getItem(getStorageKey());
             if (saved) {
                 try {
                     const state = JSON.parse(saved);
@@ -835,11 +867,24 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
         }
         
         function clearSpreadState() {
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(getStorageKey());
         }
         
         // 页面加载时恢复状态
-        loadSpreadState();
+        function initApp() {
+            const userId = getUserId();
+            if (!userId) {
+                // 首次访问，提示设置用户名
+                const userName = prompt('欢迎使用星契塔罗！\n\n请输入你的名字或昵称（用于保存你的抽牌记录）：', '');
+                if (userName && userName.trim()) {
+                    setUserId(userName.trim().substring(0, 20));
+                } else {
+                    setUserId('guest_' + Date.now());
+                }
+            }
+            loadSpreadState();
+        }
+        initApp();
         
         // ========== 三牌阵 ==========
         let spreadCards = [];
