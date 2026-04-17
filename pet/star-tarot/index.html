@@ -831,27 +831,27 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 { name: '▶ 未来', icon: '🔮', desc: '即将发生的事', color: '#43e97b' }
             ];
             
-            let html = '<div style="max-width:650px; margin:0 auto;">';
+            let html = '<div style="max-width:650px; margin:0 auto; padding:0 10px;">';
             
             // ========== 第一部分：每张牌的详细信息 ==========
-            html += '<div style="margin-bottom:25px;">';
-            html += '<div style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:15px; text-align:center;">━━━━━━━ 三牌详情 ━━━━━━━</div>';
+            html += '<div style="margin-bottom:15px;">';
+            html += '<div style="font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:10px; text-align:center;">━━━━━━━ 三牌详情 ━━━━━━━</div>';
             
             spreadCards.forEach((card, i) => {
                 const pos = positions[i];
                 const coreEnergy = card.coreEnergy || '待发现';
                 
                 html += `
-                <div style="margin-bottom:15px; padding:15px; background:rgba(255,255,255,0.02); border-radius:12px; border-left:3px solid ${pos.color};">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="width:60px; height:85px; background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(67,233,123,0.15)); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                            <span style="font-size:28px;">${card.emoji || '🃏'}</span>
+                <div style="margin-bottom:10px; padding:12px; background:rgba(255,255,255,0.02); border-radius:10px; border-left:3px solid ${pos.color};">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:50px; height:70px; background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(67,233,123,0.15)); border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                            <span style="font-size:24px;">${card.emoji || '🃏'}</span>
                         </div>
                         <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:600; color:${pos.color}; margin-bottom:4px;">${pos.icon} ${pos.name}</div>
-                            <div style="font-size:14px; font-weight:600; margin-bottom:4px;">${card.name}</div>
-                            <div style="font-size:10px; color:${pos.color}; margin-bottom:6px;">⚡ ${coreEnergy}</div>
-                            <div>${card.keywords ? card.keywords.slice(0,3).map(k => `<span style="display:inline-block; padding:2px 7px; margin:1px; background:rgba(139,92,246,0.2); border-radius:10px; font-size:10px;">${k}</span>`).join('') : ''}</div>
+                            <div style="font-size:12px; font-weight:600; color:${pos.color}; margin-bottom:3px;">${pos.icon} ${pos.name}</div>
+                            <div style="font-size:13px; font-weight:600; margin-bottom:3px;">${card.name}</div>
+                            <div style="font-size:9px; color:${pos.color}; margin-bottom:4px;">⚡ ${coreEnergy}</div>
+                            <div>${card.keywords ? card.keywords.slice(0,3).map(k => `<span style="display:inline-block; padding:2px 6px; margin:1px; background:rgba(139,92,246,0.2); border-radius:8px; font-size:9px;">${k}</span>`).join('') : ''}</div>
                         </div>
                     </div>
                 </div>
@@ -876,62 +876,61 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             const todayAdvice = loveTotal >= 10 && careerTotal >= 10 ? '今天综合能量很强，适合全面推进！' : loveTotal >= 10 ? '感情能量突出，适合处理关系问题' : careerTotal >= 10 ? '事业机遇显现，勇敢把握' : '今天适合沉淀，等待更好的时机';
             
             html += `
-            <div style="margin-bottom:25px;">
-                <div style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:15px; text-align:center;">━━━━━━━ 整体解读 ━━━━━━━</div>
-                <div style="padding:22px; background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(67,233,123,0.06)); border-radius:16px; border:1px solid rgba(139,92,246,0.1);">
+            <div style="margin-bottom:15px;">
+                <div style="font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:10px; text-align:center;">━━━━━━━ 整体解读 ━━━━━━━</div>
+                <div style="padding:15px; background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(67,233,123,0.06)); border-radius:14px; border:1px solid rgba(139,92,246,0.1);">
                     
-                    <div style="padding:16px; background:rgba(0,0,0,0.2); border-radius:12px; margin-bottom:18px;">
-                        <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:6px; letter-spacing:1px;">🔮 能量主题</div>
-                        <div style="font-size:15px; color:rgba(255,255,255,0.95); font-weight:500; line-height:1.7;">
+                    <div style="padding:12px; background:rgba(0,0,0,0.2); border-radius:10px; margin-bottom:12px;">
+                        <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-bottom:4px; letter-spacing:1px;">🔮 能量主题</div>
+                        <div style="font-size:14px; color:rgba(255,255,255,0.95); font-weight:500; line-height:1.6;">
                             ${card0.emoji} ${card0.name} → ${card1.emoji} ${card1.name} → ${card2.emoji} ${card2.name}
                         </div>
                     </div>
                     
-                    <div style="padding:16px; background:linear-gradient(135deg,rgba(67,233,123,0.12),rgba(56,181,201,0.08)); border-radius:12px; margin-bottom:18px; border:1px solid rgba(67,233,123,0.15);">
-                        <div style="font-size:10px; color:#43e97b; margin-bottom:10px; letter-spacing:1px;">✨ 综合分析</div>
-                        <div style="font-size:13px; color:rgba(255,255,255,0.9); line-height:2;">
-                            ${energyFlow}。<br><br>
+                    <div style="padding:12px; background:linear-gradient(135deg,rgba(67,233,123,0.12),rgba(56,181,201,0.08)); border-radius:10px; margin-bottom:12px; border:1px solid rgba(67,233,123,0.15);">
+                        <div style="font-size:9px; color:#43e97b; margin-bottom:6px; letter-spacing:1px;">✨ 综合分析</div>
+                        <div style="font-size:12px; color:rgba(255,255,255,0.9); line-height:1.8;">
+                            ${energyFlow}。<br>
                             ${coreTheme}
                         </div>
                     </div>
                     
-                    <div style="padding:16px; background:rgba(0,0,0,0.15); border-radius:12px; margin-bottom:18px;">
-                        <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:12px; letter-spacing:1px;">💫 今日指引</div>
-                        <div style="font-size:12px; color:rgba(255,255,255,0.85); line-height:2;">
-                            ${todayAdvice}<br><br>
-                            ${card0.guidance ? card0.guidance.replace(/[#*🎩🌙👑💕⚔️🛐]/g,'').replace(/\n/g,'<br>').substring(0,150).trim() : '回顾过去，接受现在的挑战，信任未来的方向'}
+                    <div style="padding:12px; background:rgba(0,0,0,0.15); border-radius:10px; margin-bottom:12px;">
+                        <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-bottom:8px;">💫 今日指引</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.85); line-height:1.8;">
+                            ${todayAdvice} · ${card0.guidance ? card0.guidance.replace(/[#*🎩🌙👑💕⚔️🛐]/g,'').replace(/\n/g,' ').substring(0,80).trim() : '回顾过去，接受现在的挑战，信任未来的方向'}
                         </div>
                     </div>
                     
-                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px;">
-                        <div style="text-align:center; padding:12px 8px; background:rgba(255,255,255,0.03); border-radius:10px;">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:6px;">💕 爱情</div>
-                            <div style="font-size:14px;">${'★'.repeat(Math.round(loveTotal/3))}${'☆'.repeat(5-Math.round(loveTotal/3))}</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:4px;">${loveLevel}</div>
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px;">
+                        <div style="text-align:center; padding:10px 6px; background:rgba(255,255,255,0.03); border-radius:8px;">
+                            <div style="font-size:9px; color:rgba(255,255,255,0.5); margin-bottom:4px;">💕 爱情</div>
+                            <div style="font-size:12px;">${'★'.repeat(Math.round(loveTotal/3))}${'☆'.repeat(5-Math.round(loveTotal/3))}</div>
+                            <div style="font-size:8px; color:rgba(255,255,255,0.4); margin-top:3px;">${loveLevel}</div>
                         </div>
-                        <div style="text-align:center; padding:12px 8px; background:rgba(255,255,255,0.03); border-radius:10px;">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:6px;">💼 事业</div>
-                            <div style="font-size:14px;">${'★'.repeat(Math.round(careerTotal/3))}${'☆'.repeat(5-Math.round(careerTotal/3))}</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:4px;">${careerLevel}</div>
+                        <div style="text-align:center; padding:10px 6px; background:rgba(255,255,255,0.03); border-radius:8px;">
+                            <div style="font-size:9px; color:rgba(255,255,255,0.5); margin-bottom:4px;">💼 事业</div>
+                            <div style="font-size:12px;">${'★'.repeat(Math.round(careerTotal/3))}${'☆'.repeat(5-Math.round(careerTotal/3))}</div>
+                            <div style="font-size:8px; color:rgba(255,255,255,0.4); margin-top:3px;">${careerLevel}</div>
                         </div>
-                        <div style="text-align:center; padding:12px 8px; background:rgba(255,255,255,0.03); border-radius:10px;">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:6px;">💪 健康</div>
-                            <div style="font-size:14px;">${'★'.repeat(Math.round(healthTotal/3))}${'☆'.repeat(5-Math.round(healthTotal/3))}</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:4px;">${healthTotal >= 10 ? '良好' : healthTotal >= 6 ? '一般' : '注意'}</div>
+                        <div style="text-align:center; padding:10px 6px; background:rgba(255,255,255,0.03); border-radius:8px;">
+                            <div style="font-size:9px; color:rgba(255,255,255,0.5); margin-bottom:4px;">💪 健康</div>
+                            <div style="font-size:12px;">${'★'.repeat(Math.round(healthTotal/3))}${'☆'.repeat(5-Math.round(healthTotal/3))}</div>
+                            <div style="font-size:8px; color:rgba(255,255,255,0.4); margin-top:3px;">${healthTotal >= 10 ? '良好' : healthTotal >= 6 ? '一般' : '注意'}</div>
                         </div>
-                        <div style="text-align:center; padding:12px 8px; background:rgba(255,255,255,0.03); border-radius:10px;">
-                            <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:6px;">💰 财运</div>
-                            <div style="font-size:14px;">${'★'.repeat(Math.round(wealthTotal/3))}${'☆'.repeat(5-Math.round(wealthTotal/3))}</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:4px;">${wealthTotal >= 10 ? '较好' : wealthTotal >= 6 ? '平稳' : '保守'}</div>
+                        <div style="text-align:center; padding:10px 6px; background:rgba(255,255,255,0.03); border-radius:8px;">
+                            <div style="font-size:9px; color:rgba(255,255,255,0.5); margin-bottom:4px;">💰 财运</div>
+                            <div style="font-size:12px;">${'★'.repeat(Math.round(wealthTotal/3))}${'☆'.repeat(5-Math.round(wealthTotal/3))}</div>
+                            <div style="font-size:8px; color:rgba(255,255,255,0.4); margin-top:3px;">${wealthTotal >= 10 ? '较好' : wealthTotal >= 6 ? '平稳' : '保守'}</div>
                         </div>
                     </div>
                     
-                    <div style="padding:14px; background:linear-gradient(90deg,rgba(67,233,123,0.1),rgba(139,92,246,0.08)); border-radius:10px;">
-                        <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-bottom:10px;">📋 行动建议</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.8); line-height:2.2;">
-                            ① 接纳${card0.name}的能量——它是你现在的根基<br>
-                            ② 专注${card1.name}的课题——这是你正在经历的转化<br>
-                            ③ 信任${card2.name}的方向——未来正在展开
+                    <div style="padding:12px; background:linear-gradient(90deg,rgba(67,233,123,0.1),rgba(139,92,246,0.08)); border-radius:10px;">
+                        <div style="font-size:9px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📋 行动建议</div>
+                        <div style="font-size:10px; color:rgba(255,255,255,0.8); line-height:2;">
+                            ① 接纳${card0.name}的能量<br>
+                            ② 专注${card1.name}的课题<br>
+                            ③ 信任${card2.name}的方向
                         </div>
                     </div>
                     
@@ -941,8 +940,8 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             
             // ========== 第三部分：AI深度解读按钮 ==========
             html += `
-            <div style="text-align:center; margin-top:25px;">
-                <button onclick="requestSpreadAI()" style="padding:16px 40px; background:linear-gradient(135deg,#43e97b,#38b5c9); border:none; border-radius:30px; color:#000; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 4px 20px rgba(67,233,123,0.3);">
+            <div style="text-align:center; margin-top:15px; margin-bottom:20px;">
+                <button onclick="requestSpreadAI()" style="padding:14px 35px; background:linear-gradient(135deg,#43e97b,#38b5c9); border:none; border-radius:25px; color:#000; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 4px 20px rgba(67,233,123,0.3);">
                     🤖 AI深度解读
                 </button>
             </div>
@@ -960,11 +959,11 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             // 保存当前三牌阵内容
             const cardsHtml = resultDiv.innerHTML;
             
-            // 显示加载状态
-            resultDiv.innerHTML = cardsHtml + `
-                <div id="aiLoading" style="text-align:center; padding:25px; margin-top:20px;">
-                    <div style="font-size:16px; color:#43e97b; margin-bottom:12px;">🤖 小七正在解读三牌能量...</div>
-                    <div style="font-size:12px; color:rgba(255,255,255,0.5);">探索过去、现在、未来的能量联系</div>
+            // 显示加载状态（紧凑）
+            resultDiv.innerHTML = `
+                <div style="text-align:center; padding:30px;">
+                    <div style="font-size:16px; color:#43e97b; margin-bottom:10px;">🤖 小七正在解读...</div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.5);">探索三牌能量联系</div>
                 </div>
             `;
             
@@ -999,13 +998,10 @@ ${cardsInfo}
             })
             .then(res => res.json())
             .then(data => {
-                const loadingEl = document.getElementById('aiLoading');
-                if (loadingEl) loadingEl.remove();
-                
-                resultDiv.innerHTML = cardsHtml + `
-                    <div style="padding:25px; background:linear-gradient(135deg,rgba(67,233,123,0.12),rgba(139,92,246,0.12)); border-radius:20px; margin-top:25px; border:1px solid rgba(67,233,123,0.25); max-width:600px; margin-left:auto; margin-right:auto;">
-                        <div style="font-size:16px; font-weight:600; color:#43e97b; margin-bottom:18px; text-align:center;">✨ 三牌能量深度解读 ✨</div>
-                        <div style="font-size:13px; line-height:2.2; color:rgba(255,255,255,0.9); white-space:pre-wrap;">${data.reply || '小七暂时无法回应，请稍后再试。'}</div>
+                resultDiv.innerHTML = `
+                    <div style="padding:20px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:0 auto;">
+                        <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:12px; text-align:center;">✨ AI深度解读</div>
+                        <div style="font-size:12px; line-height:2; color:rgba(255,255,255,0.9); white-space:pre-wrap; text-align:left;">${data.reply || '小七暂时无法回应，请稍后再试。'}</div>
                     </div>
                 `;
             })
