@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 星契塔罗服务器 v2
+# 星契塔罗服务器 v3
 # 使用 tarot_db.py 中的真实塔罗数据，生成深度解读
 
 import urllib.parse
@@ -16,19 +16,18 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 from tarot_db import TAROT_DB
 
 def find_card_by_name(name):
-    """根据牌名在数据库中查找塔罗牌（改进版）"""
+    """根据牌名在数据库中查找塔罗牌（严格匹配版）"""
     if not name:
         return None, None
     
+    # 清理输入
     name_clean = name.strip()
-    # 移除序号前缀
     name_clean = re.sub(r'^[第\d]+[张号个]?', '', name_clean).strip()
-    # 移除emoji
     name_clean = re.sub(r'[\U0001F300-\U0001F9FF]', '', name_clean).strip()
     
-    # 牌名简化映射（五芒星/星币 等统一）
-    shorthand = {
-        '愚人': '愚者', '魔术师': '魔术师', '女祭司': '女祭司',
+    # 标准化牌名
+    replacements = {
+        '愚人': '愚者',
         '权杖一': '权杖王牌', '圣杯一': '圣杯王牌', '宝剑一': '宝剑王牌', '星币一': '星币王牌',
         '权杖二': '权杖二', '圣杯二': '圣杯二', '宝剑二': '宝剑二', '星币二': '星币二',
         '权杖三': '权杖三', '圣杯三': '圣杯三', '宝剑三': '宝剑三', '星币三': '星币三',
@@ -41,52 +40,36 @@ def find_card_by_name(name):
         '权杖十': '权杖十', '圣杯十': '圣杯十', '宝剑十': '宝剑十', '星币十': '星币十',
         '五芒星': '星币', '五芒星七': '星币七', '五芒星六': '星币六', '五芒星九': '星币九',
     }
-    for k, v in shorthand.items():
-        if k in name_clean:
-            name_clean = name_clean.replace(k, v)
+    for old, new in replacements.items():
+        if old in name_clean:
+            name_clean = name_clean.replace(old, new)
     
-    # 精确匹配中文名
+    # 完全匹配（最严格）
     for card_id, card_data in TAROT_DB.items():
         card_name = card_data['name']
-        chinese_name = re.sub(r'\s*\(.*\)', '', card_name)
+        chinese_name = re.sub(r'\s*\(.*\)', '', card_name).strip()
         if chinese_name == name_clean:
             return card_id, card_data
     
-    # 前缀匹配
+    # 包含匹配（次严格）
     for card_id, card_data in TAROT_DB.items():
         card_name = card_data['name']
-        chinese_name = re.sub(r'\s*\(.*\)', '', card_name)
-        if chinese_name.startswith(name_clean) or name_clean in chinese_name:
+        chinese_name = re.sub(r'\s*\(.*\)', '', card_name).strip()
+        # 完全包含
+        if name_clean in chinese_name or chinese_name in name_clean:
             return card_id, card_data
     
-    # 关键词匹配
-    if len(name_clean) >= 2:
+    # 关键词匹配（兜底）
+    if len(name_clean) >= 3:  # 至少3个字才用关键词匹配
         for card_id, card_data in TAROT_DB.items():
             for kw in card_data.get('keywords', []):
-                if kw in name_clean and len(kw) >= 2:
+                if len(kw) >= 2 and kw == name_clean:
                     return card_id, card_data
-    
-    # 最后：取前2个字匹配
-    if len(name_clean) >= 2:
-        short = name_clean[:2]
-        for card_id, card_data in TAROT_DB.items():
-            card_name = card_data['name']
-            chinese_name = re.sub(r'\s*\(.*\)', '', card_name)
-            if short in chinese_name:
-                return card_id, card_data
     
     return None, None
 
-def get_all_card_names():
-    """返回所有牌的中文名列表"""
-    names = []
-    for card_id, card_data in TAROT_DB.items():
-        name = re.sub(r'\s*\(.*\)', '', card_data['name'])
-        names.append(name)
-    return names
-
-def generate_three_card_reading_v2(message):
-    """生成三牌阵的AI深度解读 v2（充分利用数据库）"""
+def generate_three_card_reading_v3(message):
+    """生成三牌阵的AI深度解读 v3（严格匹配 + 完整guidance）"""
     
     positions = ['过去', '现在', '未来']
     colors = ['#a78bfa', '#c678dd', '#43e97b']
@@ -106,14 +89,14 @@ def generate_three_card_reading_v2(message):
             card_id, db_card = find_card_by_name(card_name)
             if db_card:
                 card_info['name'] = db_card['name']
-                card_info['emoji'] = db_card['emoji']
+                card_info['emoji'] = db_card.get('emoji', '🃏')
                 card_info['suit'] = db_card.get('suit', '未知')
                 card_info['keywords'] = db_card.get('keywords', [])
                 card_info['summary'] = db_card.get('summary', '')
                 card_info['coreEnergy'] = db_card.get('coreEnergy', '')
                 card_info['guidance'] = db_card.get('guidance', '')
                 card_info['goldSentence'] = db_card.get('goldSentence', '')
-                card_info['db_source'] = card_id
+                card_info['matched'] = card_id
             else:
                 card_info['name'] = card_name
                 card_info['emoji'] = '🃏'
@@ -122,6 +105,7 @@ def generate_three_card_reading_v2(message):
                 card_info['coreEnergy'] = '未知'
                 card_info['guidance'] = '这张牌的能量还未被解读...'
                 card_info['goldSentence'] = '静待揭示...'
+                card_info['matched'] = None
         else:
             card_info['name'] = '未知牌'
             card_info['emoji'] = '🃏'
@@ -130,10 +114,11 @@ def generate_three_card_reading_v2(message):
             card_info['coreEnergy'] = '未知'
             card_info['guidance'] = '请重新抽取塔罗牌...'
             card_info['goldSentence'] = '未知'
+            card_info['matched'] = None
         
         cards.append(card_info)
     
-    # 生成能量主题
+    # 能量主题
     themes = [c['keywords'][0] if c['keywords'] else '未知' for c in cards]
     energy_theme = ' → '.join(themes)
     
@@ -145,92 +130,79 @@ def generate_three_card_reading_v2(message):
     else:
         suit_analysis = f"三张牌来自不同牌组：{'、'.join(set(suits))}，能量多元交织。"
     
-    # 核心能量分析
-    core_energies = [c['coreEnergy'] if c['coreEnergy'] else '未知' for c in cards]
-    energy_flow = f"""<span style="color:{cards[0]['color']};">◀ {cards[0]['name']}</span>
-　　<span class="text-gray-500">能量根源</span>
-　　{core_energies[0]}
-
-<span style="color:{cards[1]['color']};">● {cards[1]['name']}</span>
-　　<span class="text-gray-500">能量转化</span>
-　　{core_energies[1]}
-
-<span style="color:{cards[2]['color']};">▶ {cards[2]['name']}</span>
-　　<span class="text-gray-500">能量指向</span>
-　　{core_energies[2]}"""
-    
-    # 三牌核心洞察
-    insights = []
+    # 核心能量流向
+    energy_flow = ""
     for c in cards:
-        insight = f"""<div class="mb-4">
-<span style="color:{c['color']};" class="font-bold">{c['name']} {c['emoji']}</span>
-<div class="ml-4 mt-2">
-<div class="text-xs text-gray-500 mb-1">核心能量：{c['coreEnergy']}</div>
-<div class="text-xs text-gray-500 mb-1">关键词：{' · '.join(c['keywords'])}</div>
-<div class="text-sm mt-2 leading-relaxed">{c['summary']}</div>
-</div>
-</div>"""
-        insights.append(insight)
+        energy_flow += f"""<span style="color:{c['color']};">◀ {c['name']}</span>
+　　{c['coreEnergy']}
+"""
     
-    # 深度解读（直接使用guidance）
-    guidances = []
+    # 三牌独立解读（完整guidance）
+    card_readings = ""
     for c in cards:
         g = c.get('guidance', '')
-        if g:
-            guidances.append(f"""<div class="mb-4 p-3 bg-gray-50 rounded-lg">
-<span style="color:{c['color']};" class="font-bold">{c['name']}</span>
-<div class="text-sm mt-2 leading-relaxed text-gray-700">{g}</div>
-</div>""")
+        if not g:
+            g = '这张牌的能量还未被完全解读...'
+        
+        card_readings += f"""
+<div class="mb-6 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-l-4" style="border-color: {c['color']};">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-2xl">{c['emoji']}</span>
+<span class="font-bold text-lg" style="color: {c['color']};">{c['name']}</span>
+</div>
+<div class="text-xs text-gray-500 mb-2">⚡ {c['coreEnergy']}</div>
+<div class="text-xs text-gray-400 mb-3">🔮 {' · '.join(c['keywords'])}</div>
+<div class="text-sm leading-relaxed text-gray-700">{g}</div>
+<div class="mt-3 pt-3 border-t border-gray-100 text-sm text-ai">✨ {c.get('goldSentence', '')}</div>
+</div>"""
     
-    # 金句
-    gold_sentences = [c.get('goldSentence', '') for c in cards if c.get('goldSentence')]
-    
-    # 行动建议
-    actions = f"""1. 【接纳{cards[0]['name']}】
-　　{cards[0]['coreEnergy']}
-　　思考：这份能量如何在背后支持你？
-
-2. 【拥抱{cards[1]['name']}】
-　　{cards[1]['coreEnergy']}
-　　行动：今天如何更好地参与这个转化？
-
-3. 【期待{cards[2]['name']}】
-　　{cards[2]['coreEnergy']}
-　　态度：保持开放，结果会以最合适的方式出现"""
+    # 整合解读
+    readings_html = ""
+    for i, c in enumerate(cards):
+        position_text = ['过去', '现在', '未来'][i]
+        readings_html += f"""
+<div class="mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm" style="background-color: {c['color']};">{i+1}</span>
+<span class="font-bold" style="color: {c['color']};">{position_text}：{c['name']}</span>
+</div>
+<div class="ml-10 text-sm text-gray-600">
+<div class="mb-1">⚡ {c['coreEnergy']}</div>
+<div class="mb-1">🔮 {' · '.join(c['keywords'])}</div>
+<div class="text-xs text-gray-500">匹配ID: {c.get('matched', 'None')}</div>
+</div>
+</div>"""
     
     reading = f"""
 ✨ 【三牌阵深度解读】✨
 
 ━━━━━━━━━━━━━━━━━━━━
+📍 三牌位置确认
+━━━━━━━━━━━━━━━━━━━━
+{readings_html}
+
+━━━━━━━━━━━━━━━━━━━━
 🔮 能量主题
 ━━━━━━━━━━━━━━━━━━━━
 {energy_theme}
-<span class="block mt-2 text-xs text-gray-500">{suit_analysis}</span>
+{suit_analysis}
 
 ━━━━━━━━━━━━━━━━━━━━
-⚡ 核心能量分析
+⚡ 核心能量流向
 ━━━━━━━━━━━━━━━━━━━━
 {energy_flow}
 
 ━━━━━━━━━━━━━━━━━━━━
-📖 三牌核心洞察
+📖 三牌完整解读
 ━━━━━━━━━━━━━━━━━━━━
-{''.join(insights)}
+{card_readings}
 
 ━━━━━━━━━━━━━━━━━━━━
-🔮 深度解读
+💡 行动指引
 ━━━━━━━━━━━━━━━━━━━━
-{''.join(guidances)}
-
-━━━━━━━━━━━━━━━━━━━━
-💫 今日金句
-━━━━━━━━━━━━━━━━━━━━
-{' | '.join([f'<span class="text-ai">{g}</span>' for g in gold_sentences])}
-
-━━━━━━━━━━━━━━━━━━━━
-💡 整合行动指南
-━━━━━━━━━━━━━━━━━━━━
-{actions}
+1. 【接纳{cards[0]['name']}】{cards[0]['coreEnergy']}
+2. 【拥抱{cards[1]['name']}】{cards[1]['coreEnergy']}
+3. 【期待{cards[2]['name']}】{cards[2]['coreEnergy']}
 
 ━━━━━━━━━━━━━━━━━━━━
 
@@ -241,25 +213,16 @@ def generate_three_card_reading_v2(message):
 """
     return reading.strip()
 
-def generate_single_reading_v2(card_name):
-    """生成单张牌的深度解读 v2"""
+def generate_single_reading_v3(card_name):
+    """生成单张牌的深度解读 v3"""
     
     card_id, db_card = find_card_by_name(card_name)
     
     if not db_card:
         return f"""✨ 【{card_name}】🃏
 
-━━━━━━━━━━━━━━━━━━━━
-📖 牌面解读
-━━━━━━━━━━━━━━━━━━━━
 这张牌的能量还未被记录...
-
-━━━━━━━━━━━━━━━━━━━━
-💫 今日提示
-━━━━━━━━━━━━━━━━━━━━
-有时候，未知也是一种可能性。
-今天试着以开放的心态面对一切。
-"""
+匹配失败，请检查牌名。"""
 
     emoji = db_card.get('emoji', '🃏')
     name = db_card.get('name', card_name)
@@ -311,11 +274,9 @@ class TarotsHandler(SimpleHTTPRequestHandler):
             data = urllib.parse.parse_qs(post_data)
             message = data.get('message', [''])[0]
             
-            # 检测是否是三牌阵请求
             if '过去：' in message and '现在：' in message and '未来：' in message:
-                reading = generate_three_card_reading_v2(message)
+                reading = generate_three_card_reading_v3(message)
             else:
-                # 单张牌解读
                 card_name = "塔罗牌"
                 if '塔罗牌「' in message:
                     try:
@@ -325,16 +286,7 @@ class TarotsHandler(SimpleHTTPRequestHandler):
                             card_name = message[start:end]
                     except:
                         pass
-                elif '牌名：' in message:
-                    try:
-                        start = message.find('牌名：') + 3
-                        end = message.find('\n', start)
-                        if end > start:
-                            card_name = message[start:end].strip()
-                    except:
-                        pass
-                
-                reading = generate_single_reading_v2(card_name)
+                reading = generate_single_reading_v3(card_name)
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -352,7 +304,7 @@ class TarotsHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
 if __name__ == '__main__':
-    print(f"星契塔罗服务器 v2 启动成功！")
+    print(f"星契塔罗服务器 v3 启动成功！")
     print(f"塔罗数据库已加载：{len(TAROT_DB)} 张牌")
     print(f"访问: http://localhost:{PORT}")
     server = HTTPServer(('0.0.0.0', PORT), TarotsHandler)
