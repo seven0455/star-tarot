@@ -1059,21 +1059,16 @@ ${cardsInfo}
             })
             .then(res => res.json())
             .then(data => {
-                const reply = data.reply || '小七暂时无法回应，请稍后再试。';
-                // 解析AI文本，分成段落
-                const sections = formatAIReply(reply);
-                
-                let sectionsHtml = sections.map(s => `
-                    <div style="margin-bottom:12px;">
-                        <div style="font-size:10px; color:#43e97b; margin-bottom:4px;">${s.title}</div>
-                        <div style="font-size:11px; line-height:1.7; color:rgba(255,255,255,0.85);">${s.content}</div>
-                    </div>
-                `).join('');
+                const reply = (data.reply || '小七暂时无法回应，请稍后再试。')
+                    .replace(/\n{3,}/g, '\n\n')
+                    .replace(/。。/g, '。')
+                    .replace(/[,，]+。/g, '。')
+                    .trim();
                 
                 resultDiv.innerHTML = `
                     <div style="padding:18px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:0 auto;">
                         <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:14px; text-align:center;">✨ AI深度解读</div>
-                        ${sectionsHtml}
+                        <div style="font-size:12px; line-height:1.8; color:rgba(255,255,255,0.9);">${reply}</div>
                     </div>
                 `;
             })
