@@ -604,28 +604,56 @@
         
         <!-- 三牌阵 -->
         <div class="spread-section" id="spreadSection">
-            <div style="text-align:center; margin-bottom: 20px;">
-                <p style="color: rgba(255,255,255,0.7); font-size: 13px;">请依次点击三张牌</p>
-            </div>
             
-            <div class="spread-cards">
-                <div class="spread-slot">
-                    <div class="spread-position">过去</div>
-                    <div class="spread-card" id="spreadCard0">点击抽牌</div>
-                </div>
-                <div class="spread-slot">
-                    <div class="spread-position">现在</div>
-                    <div class="spread-card" id="spreadCard1">点击抽牌</div>
-                </div>
-                <div class="spread-slot">
-                    <div class="spread-position">未来</div>
-                    <div class="spread-card" id="spreadCard2">点击抽牌</div>
+            <!-- 问题输入阶段 -->
+            <div class="spread-phase" id="spreadPhaseQuestion">
+                <div style="text-align:center; padding: 20px 0;">
+                    <div style="font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 20px;">🔮 请在心中默念你的问题</div>
+                    <textarea id="spreadQuestion" placeholder="例如：我最近的工作发展会如何？" style="width:90%; max-width:400px; padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:12px; color:#fff; font-size:14px; resize:none; outline:none;" rows="2"></textarea>
+                    <div style="margin-top: 20px;">
+                        <button onclick="startMeditation()" style="padding:14px 40px; background:linear-gradient(135deg,#9d4edd,#c678dd); border:none; border-radius:25px; color:#fff; font-size:15px; cursor:pointer;">✨ 开始冥想</button>
+                    </div>
                 </div>
             </div>
             
-            <button class="draw-btn" id="spreadResetBtn" style="display:none; margin: 15px auto;">🔄 重新抽牌</button>
+            <!-- 冥想阶段 -->
+            <div class="spread-phase" id="spreadPhaseMeditation" style="display:none;">
+                <div style="text-align:center; padding: 60px 20px;">
+                    <div id="meditationAnimation" style="font-size: 60px; margin-bottom: 30px;">🌙</div>
+                    <div style="font-size: 18px; color: rgba(255,255,255,0.8); margin-bottom: 15px;">专注你的问题...</div>
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.5);">让宇宙的星辰指引你</div>
+                </div>
+            </div>
             
-            <div class="spread-result" id="spreadResult"></div>
+            <!-- 抽牌阶段 -->
+            <div class="spread-phase" id="spreadPhaseDraw" style="display:none;">
+                <div style="text-align:center; margin-bottom: 20px;">
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 10px;">你的问题：</div>
+                    <div id="spreadQuestionDisplay" style="font-size: 14px; color: #c678dd; max-width: 350px; margin: 0 auto;"></div>
+                </div>
+                <div style="text-align:center; margin-bottom: 20px;">
+                    <p style="color: rgba(255,255,255,0.7); font-size: 13px;">请依次点击三张牌</p>
+                </div>
+                
+                <div class="spread-cards">
+                    <div class="spread-slot">
+                        <div class="spread-position">过去</div>
+                        <div class="spread-card" id="spreadCard0">点击抽牌</div>
+                    </div>
+                    <div class="spread-slot">
+                        <div class="spread-position">现在</div>
+                        <div class="spread-card" id="spreadCard1">点击抽牌</div>
+                    </div>
+                    <div class="spread-slot">
+                        <div class="spread-position">未来</div>
+                        <div class="spread-card" id="spreadCard2">点击抽牌</div>
+                    </div>
+                </div>
+                
+                <button class="draw-btn" id="spreadResetBtn" style="display:none; margin: 15px auto;">🔄 重新开始</button>
+                
+                <div class="spread-result" id="spreadResult"></div>
+            </div>
         </div>
         
         <div class="divider"></div>
@@ -870,13 +898,15 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             return 'tarot_daily_history_' + currentUser;
         }
         
-        function addToHistory(cards) {
+        function addToHistory(cards, question, aiReply) {
             const historyKey = getHistoryKey();
             let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-            // 只保留最近10条
-            history = history.slice(0, 9);
+            // 只保留最近3条
+            history = history.slice(0, 2);
             history.unshift({
                 cards: cards,
+                question: question,
+                aiReply: aiReply,
                 timestamp: Date.now()
             });
             localStorage.setItem(historyKey, JSON.stringify(history));
@@ -947,26 +977,29 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 
                 if (item.type === 'spread') {
                     const c0 = item.data.cards[0], c1 = item.data.cards[1], c2 = item.data.cards[2];
+                    const questionPreview = item.data.question ? item.data.question.substring(0, 30) + (item.data.question.length > 30 ? '...' : '') : '未填写问题';
                     html += `
                         <div style="padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:12px; cursor:pointer; border-left:3px solid #9d4edd;" onclick="loadHistoryItem(${index})">
                             <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📅 ${dateStr} <span style="margin-left:6px; padding:2px 6px; background:rgba(157,78,221,0.2); border-radius:4px; font-size:10px;">三牌阵</span></div>
+                            <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px;">❓ ${questionPreview}</div>
                             <div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:8px;">
                                 <div style="flex:1; text-align:center;">
-                                    <div style="font-size:20px;">${c0.emoji}</div>
+                                    <div style="font-size:18px;">${c0.emoji}</div>
                                     <div style="font-size:10px; color:#a78bfa;">过去</div>
                                     <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c0.name.split(' ')[0]}</div>
                                 </div>
                                 <div style="flex:1; text-align:center;">
-                                    <div style="font-size:20px;">${c1.emoji}</div>
+                                    <div style="font-size:18px;">${c1.emoji}</div>
                                     <div style="font-size:10px; color:#c678dd;">现在</div>
                                     <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c1.name.split(' ')[0]}</div>
                                 </div>
                                 <div style="flex:1; text-align:center;">
-                                    <div style="font-size:20px;">${c2.emoji}</div>
+                                    <div style="font-size:18px;">${c2.emoji}</div>
                                     <div style="font-size:10px; color:#43e97b;">未来</div>
                                     <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c2.name.split(' ')[0]}</div>
                                 </div>
                             </div>
+                            <div style="font-size:10px; color:rgba(255,255,255,0.4);">点击查看AI解读</div>
                         </div>
                     `;
                 } else {
@@ -1082,7 +1115,69 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             document.getElementById('historyModal').style.display = 'none';
         }
         
-        // 页面加载时恢复状态
+        // 冥想功能
+        let userQuestion = '';
+        let meditationDone = false;
+        
+        function startMeditation() {
+            userQuestion = document.getElementById('spreadQuestion').value.trim();
+            if (!userQuestion) {
+                alert('请先输入你的问题');
+                return;
+            }
+            
+            // 显示冥想阶段
+            document.getElementById('spreadPhaseQuestion').style.display = 'none';
+            document.getElementById('spreadPhaseMeditation').style.display = 'block';
+            document.getElementById('spreadQuestionDisplay').textContent = userQuestion;
+            
+            // 星辰动画
+            const meditationEl = document.getElementById('meditationAnimation');
+            const phases = ['🌙', '✨', '⭐', '🌟', '✨'];
+            let i = 0;
+            const animation = setInterval(() => {
+                meditationEl.textContent = phases[i % phases.length];
+                meditationEl.style.transform = 'scale(' + (1 + Math.sin(i * 0.5) * 0.2 + ')';
+                i++;
+            }, 800);
+            
+            // 3秒后进入抽牌阶段
+            setTimeout(() => {
+                clearInterval(animation);
+                document.getElementById('spreadPhaseMeditation').style.display = 'none';
+                document.getElementById('spreadPhaseDraw').style.display = 'block';
+                meditationDone = true;
+            }, 3000);
+        }
+        
+        function showPhase(phase) {
+            document.querySelectorAll('.spread-phase').forEach(p => p.style.display = 'none');
+            document.getElementById('spreadPhase' + phase).style.display = 'block';
+        }
+        
+        function resetSpreadFlow() {
+            // 重置整个流程
+            userQuestion = '';
+            meditationDone = false;
+            spreadCards = [];
+            document.getElementById('spreadQuestion').value = '';
+            document.getElementById('spreadResult').innerHTML = '';
+            document.getElementById('spreadResetBtn').style.display = 'none';
+            
+            // 重置卡片
+            for (let i = 0; i < 3; i++) {
+                const card = document.getElementById('spreadCard' + i);
+                card.classList.remove('revealed');
+                card.innerHTML = '点击抽牌';
+            }
+            
+            // 清除AI结果
+            const aiContainer = document.getElementById('aiResultContainer');
+            if (aiContainer) aiContainer.innerHTML = '';
+            
+            // 回到问题阶段
+            showPhase('Question');
+        }
         function initApp() {
             const userId = getUserId();
             if (!userId) {
@@ -1278,8 +1373,7 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             resultDiv.innerHTML = html;
             document.getElementById('spreadResetBtn').style.display = 'block';
             
-            // 完成抽牌后才保存到历史
-            addToHistory(spreadCards);
+            // 注意：只在AI解读完成后才保存到历史
             
             // 保存状态到localStorage
             saveSpreadState();
@@ -1368,7 +1462,7 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 </div>
             `;
             
-            // 构建更详细的三牌阵信息
+            // 构建更详细的三牌阵信息（包含用户问题）
             const cardsInfo = spreadCards.map((card, i) => {
                 const pos = ['过去', '现在', '未来'][i];
                 const loveScore = card.love ? card.love.score : 0;
@@ -1380,17 +1474,19 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             
             const prompt = `你是塔罗占卜师，请深度解读三牌阵的能量关系。
 
+用户的问题：${userQuestion}
+
 三牌阵：
 ${cardsInfo}
 
-请从以下角度进行综合分析：
-1. 【能量流分析】过去牌如何影响现在牌，现在牌又如何指向未来牌？三张牌之间的能量是如何传递的？
-2. 【核心主题】这三张牌共同揭示了什么核心主题或生命课题？
-3. 【爱情维度】如果涉及感情，三张牌展示了感情发展的什么阶段和可能的结果？
-4. 【事业/财运】工作或财务方面可能会经历怎样的变化？
-5. 【行动建议】基于牌面能量，应该如何把握当下、创造理想未来？
+请根据用户的问题，结合牌面进行深度分析：
+1. 【能量流分析】过去牌如何影响现在牌，现在牌又如何指向未来牌？与用户问题有何关联？
+2. 【核心主题】这三张牌共同揭示了什么核心主题？
+3. 【问题回应】针对用户的问题"${userQuestion}"，牌面给出了怎样的指引？
+4. 【爱情/事业/财运】在工作、感情、财务方面可能会有什么变化？
+5. 【行动建议】基于牌面能量和用户问题，应该如何把握当下、创造理想未来？
 
-请用温暖而有洞察力的语气回答，语言要优美流畅。`;
+请用温暖而有洞察力的语气回答，语言要优美流畅，针对用户的问题给出具体建议。`;
             
             fetch('/chat', {
                 method: 'POST',
@@ -1413,6 +1509,9 @@ ${cardsInfo}
                     </div>
                 `;
                 aiContainer.innerHTML = aiSection;
+                
+                // AI解读完成后保存到历史（包含问题和AI回复）
+                addToHistory(spreadCards, userQuestion, reply);
             })
             .catch(err => {
                 const loadingEl = document.getElementById('aiLoading');
@@ -1421,24 +1520,7 @@ ${cardsInfo}
         }
         
         document.getElementById('spreadResetBtn').addEventListener('click', () => {
-            spreadCards = [];
-            spreadCount = 0;
-            
-            for (let i = 0; i < 3; i++) {
-                const card = document.getElementById(`spreadCard${i}`);
-                card.classList.remove('revealed');
-                card.innerHTML = '点击抽牌';
-            }
-            
-            document.getElementById('spreadResult').innerHTML = '';
-            document.getElementById('spreadResetBtn').style.display = 'none';
-            
-            // 清除localStorage
-            clearSpreadState();
-            
-            // 清除AI结果容器
-            const aiContainer = document.getElementById('aiResultContainer');
-            if (aiContainer) aiContainer.innerHTML = '';
+            resetSpreadFlow();
         });
         
         // ========== 历史记录弹窗 ==========
