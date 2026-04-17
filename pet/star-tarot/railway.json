@@ -2,7 +2,8 @@
   "$schema": "https://railway.app/schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "nixpacksPkgs": ["python311", "python311Packages.flask"]
+    "nixpacksPkgs": ["python311", "python311Packages.flask"],
+    "startCommand": "python3 server.py"
   },
   "deploy": {
     "numReplicas": 1,
