@@ -799,7 +799,49 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             response.classList.add('show');
         });
         
-        // 三牌阵
+        // ========== localStorage 持久化 ==========
+        const STORAGE_KEY = 'tarot_spread_state';
+        
+        function saveSpreadState() {
+            const state = {
+                spreadCards: spreadCards,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+        
+        function loadSpreadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    if (state.spreadCards && state.spreadCards.length === 3) {
+                        spreadCards = state.spreadCards;
+                        // 恢复卡片显示
+                        spreadCards.forEach((card, i) => {
+                            const cardEl = document.getElementById('spreadCard' + i);
+                            cardEl.classList.add('revealed');
+                            cardEl.innerHTML = '<span class="spread-emoji">' + (card.emoji || '🃏') + '</span><span class="spread-name">' + card.name.split(' ')[0] + '</span>';
+                        });
+                        // 恢复结果
+                        showSpreadResult();
+                        return true;
+                    }
+                } catch (e) {
+                    console.log('恢复抽牌状态失败', e);
+                }
+            }
+            return false;
+        }
+        
+        function clearSpreadState() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+        
+        // 页面加载时恢复状态
+        loadSpreadState();
+        
+        // ========== 三牌阵 ==========
         let spreadCards = [];
         let spreadCount = 0;
         
@@ -951,6 +993,9 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             
             resultDiv.innerHTML = html;
             document.getElementById('spreadResetBtn').style.display = 'block';
+            
+            // 保存状态到localStorage
+            saveSpreadState();
         }
         
         // 格式化AI回复文本
@@ -1100,6 +1145,13 @@ ${cardsInfo}
             
             document.getElementById('spreadResult').innerHTML = '';
             document.getElementById('spreadResetBtn').style.display = 'none';
+            
+            // 清除localStorage
+            clearSpreadState();
+            
+            // 清除AI结果容器
+            const aiContainer = document.getElementById('aiResultContainer');
+            if (aiContainer) aiContainer.innerHTML = '';
         });
     </script>
 </body>
