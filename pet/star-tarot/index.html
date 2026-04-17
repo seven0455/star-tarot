@@ -1012,55 +1012,45 @@
             loading.classList.add('show');
             response.classList.remove('show');
             
-            // 构建针对问题的深度解读prompt
+            // 构建针对问题的深度解读prompt - 核心：先直接回答，再分析原因
             const question = dailyUserQuestion || '今日运势如何？';
             const cardName = dailyCardData.name;
             const keywords = dailyCardData.keywords ? dailyCardData.keywords.join('、') : '';
             const summary = dailyCardData.summary || dailyCardData.meaning || '';
             const coreEnergy = dailyCardData.coreEnergy || '';
-            const guidance = dailyCardData.guidance ? dailyCardData.guidance.replace(/<[^>]*>/g, '') : '';
             
             // 运势评分
-            const loveInfo = dailyCardData.love ? `爱情运势：${dailyCardData.love.score}★（${dailyCardData.love.tip}）` : '';
-            const careerInfo = dailyCardData.career ? `事业运势：${dailyCardData.career.score}★（${dailyCardData.career.tip}）` : '';
-            const healthInfo = dailyCardData.health ? `健康运势：${dailyCardData.health.score}★（${dailyCardData.health.tip}）` : '';
-            const wealthInfo = dailyCardData.wealth ? `财富运势：${dailyCardData.wealth.score}★（${dailyCardData.wealth.tip}）` : '';
+            const loveInfo = dailyCardData.love ? `爱情：${dailyCardData.love.score}★（${dailyCardData.love.tip}）` : '';
+            const careerInfo = dailyCardData.career ? `事业：${dailyCardData.career.score}★（${dailyCardData.career.tip}）` : '';
+            const healthInfo = dailyCardData.health ? `健康：${dailyCardData.health.score}★（${dailyCardData.health.tip}）` : '';
+            const wealthInfo = dailyCardData.wealth ? `财富：${dailyCardData.wealth.score}★（${dailyCardData.wealth.tip}）` : '';
+            const scores = [loveInfo, careerInfo, healthInfo, wealthInfo].filter(Boolean).join(' | ');
             
-            const prompt = `你是塔罗占卜师。用户抽到了「${cardName}」，现在请你针对用户的问题进行深度解读。
-
-【用户的问题】
-${question}
-
-【抽到的牌】
-牌名：${cardName}
-关键词：${keywords}
-牌面含义：${summary}
+            const prompt = `你是塔罗占卜师。用户的问题是：「${question}」
+用户抽到的牌是：「${cardName}」（${keywords}）
+牌面核心含义：${summary}
 核心能量：${coreEnergy}
-${guidance}
+运势参考：${scores}
 
-【运势参考】
-${loveInfo}
-${careerInfo}
-${healthInfo}
-${wealthInfo}
+【重要】请按以下步骤进行解读：
 
-请按照以下结构进行解读：
+第1步 - 直接回答（必须先写）：
+针对用户的问题「${question}」，这张牌给出的直接回答是：是/否/不确定/有希望/需要等待...（用一句话直接回答）
 
-1. 【牌面直答】结合「${question}」，这张牌给出了怎样的直接回答？
+第2步 - 原因分析：
+为什么「${cardName}」会给出这样的回答？牌面哪个细节/能量指向了这个问题？
 
-2. 【能量分析】这张牌的核心能量「${coreEnergy}」如何对应用户的问题？
+第3步 - 具体建议：
+针对用户的问题「${question}」，今天应该怎么做？有以下建议：
+- 如果关心感情：
+- 如果关心事业：
+- 如果关心财运：
+（根据运势评分给出具体建议）
 
-3. 【分维度指引】
-   ${loveInfo ? '- 感情/爱情方面：' : ''}
-   ${careerInfo ? '- 事业/工作方面：' : ''}
-   ${healthInfo ? '- 健康/身心方面：' : ''}
-   ${wealthInfo ? '- 财富/财运方面：' : ''}
+第4步 - 一句话总结：
+用一句话概括对用户问题「${question}」的回答和建议。
 
-4. 【行动建议】针对用户的问题，应该如何把握今天的机会？
-
-5. 【今日关键词】一句话概括今日核心主题
-
-请用温暖而有洞察力的语气，结合用户的问题给出具体、可操作的建议，不要泛泛而谈。`;
+请务必先回答用户的问题，再进行分析。不要先写牌意解读，要先写对问题的直接回答！`;;
             
             try {
                 const res = await fetch('/chat', {
@@ -1676,7 +1666,7 @@ ${wealthInfo}
                 </div>
             `;
             
-            // 构建三牌阵信息（包含完整数据）
+            // 构建三牌阵信息
             const cardsInfo = spreadCards.map((card, i) => {
                 const pos = ['过去', '现在', '未来'][i];
                 const love = card.love ? `爱情${card.love.score}★(${card.love.tip})` : '';
@@ -1684,37 +1674,36 @@ ${wealthInfo}
                 const health = card.health ? `健康${card.health.score}★(${card.health.tip})` : '';
                 const wealth = card.wealth ? `财富${card.wealth.score}★(${card.wealth.tip})` : '';
                 const scores = [love, career, health, wealth].filter(Boolean).join(' | ');
-                return `${pos}：「${card.name}」${card.emoji}\n关键词：${card.keywords ? card.keywords.join('、') : ''}\n牌意：${card.summary || card.meaning || ''}\n运势：${scores}`;
+                return `${pos}：「${card.name}」（${card.keywords ? card.keywords.join('、') : ''}）\n牌意：${card.summary || card.meaning || ''}\n运势：${scores}`;
             }).join('\n\n');
             
             const question = userQuestion || '我的运势如何？';
             
-            const prompt = `你是塔罗占卜师。用户进行了三牌阵抽牌，请针对用户的问题进行深度解读。
+            const prompt = `你是塔罗占卜师。用户的问题是：「${question}」
 
-【用户的问题】
-${question}
-
-【三牌阵】
+三牌阵：
 ${cardsInfo}
 
-请按照以下结构进行解读：
+【重要】请按以下步骤进行解读：
 
-1. 【牌面直答】针对「${question}」，过去-现在-未来三张牌分别给出了怎样的回答？
+第1步 - 直接回答（必须先写）：
+针对用户的问题「${question}」，这三张牌（过去-现在-未来）给出的直接回答是：是/否/有希望/需要等待/矛盾中...（用1-2句话直接回答）
 
-2. 【能量流分析】过去牌如何影响现在牌，现在牌又如何指向未来牌？这三张牌之间的能量是如何传递的？
+第2步 - 能量分析：
+过去牌「${spreadCards[0].name}」如何影响现在牌「${spreadCards[1].name}」，又指向未来牌「${spreadCards[2].name}」？这个能量流如何回答了用户的问题？
 
-3. 【核心主题】这三张牌共同揭示了什么核心主题？与用户的问题有何关联？
+第3步 - 时间线建议：
+- 近期（过去牌指向）：应该做什么？
+- 现在（现在牌能量）：正在发生什么？
+- 未来（未来牌预示）：可能发生什么？
 
-4. 【分维度指引】
-   - 感情/爱情方面：
-   - 事业/工作方面：
-   - 财富/财运方面：
+第4步 - 具体行动：
+针对用户的问题「${question}」，今天最应该做的1件事是什么？
 
-5. 【行动建议】基于牌面能量，针对用户的问题，应该如何把握当下、创造理想未来？
+第5步 - 一句话总结：
+用一句话概括对用户问题「${question}」的回答。
 
-6. 【一句话总结】用一句话概括对用户问题的回答
-
-请用温暖而有洞察力的语气，结合用户的问题给出具体、可操作的建议。`;
+请务必先直接回答用户的问题，再进行分析！`;
             
             fetch('/chat', {
                 method: 'POST',
