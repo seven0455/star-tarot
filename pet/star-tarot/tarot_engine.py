@@ -3,7 +3,7 @@ from tarot_db import TAROT_DB
 
 def generate_three_card_comprehensive(cards):
     """
-    生成三牌阵的深度综合解读（简洁文本格式）
+    生成三牌阵的深度综合解读（无背景色，适配深色主题）
     """
     if len(cards) < 3:
         return "<p>错误：需要三张牌进行综合解读。</p>"
@@ -63,71 +63,71 @@ def generate_three_card_comprehensive(cards):
 {cards[2]['guidance'][:100]}...
 态度：保持开放，相信最好的还在前方。"""
 
-    # 构建简洁的纯文本 HTML（无复杂样式，确保兼容性）
+    # 无背景色的 HTML（适配深色主题）
     html_content = f"""
-<div style="font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.8;">
+<div style="font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #ccc; line-height: 1.8; font-size: 0.95em;">
 
     <!-- 三牌流程 -->
-    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 25px; padding: 25px; background: #f8f9fa; border-radius: 12px;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 25px; padding: 20px;">
         <div style="text-align: center;">
             <div style="font-size: 2.5em; margin-bottom: 5px;">{cards[0]['emoji']}</div>
-            <div style="font-weight: bold; color: #333;">{cards[0]['name']}</div>
-            <div style="font-size: 0.85em; color: #666;">过去</div>
+            <div style="font-weight: bold; color: #a78bfa;">{cards[0]['name']}</div>
+            <div style="font-size: 0.85em; color: #888;">过去</div>
         </div>
-        <div style="font-size: 1.8em; color: #666;">→</div>
+        <div style="font-size: 1.5em; color: #666;">→</div>
         <div style="text-align: center;">
             <div style="font-size: 2.5em; margin-bottom: 5px;">{cards[1]['emoji']}</div>
-            <div style="font-weight: bold; color: #333;">{cards[1]['name']}</div>
-            <div style="font-size: 0.85em; color: #666;">现在</div>
+            <div style="font-weight: bold; color: #c678dd;">{cards[1]['name']}</div>
+            <div style="font-size: 0.85em; color: #888;">现在</div>
         </div>
-        <div style="font-size: 1.8em; color: #666;">→</div>
+        <div style="font-size: 1.5em; color: #666;">→</div>
         <div style="text-align: center;">
             <div style="font-size: 2.5em; margin-bottom: 5px;">{cards[2]['emoji']}</div>
-            <div style="font-weight: bold; color: #333;">{cards[2]['name']}</div>
-            <div style="font-size: 0.85em; color: #666;">未来</div>
+            <div style="font-weight: bold; color: #43e97b;">{cards[2]['name']}</div>
+            <div style="font-size: 0.85em; color: #888;">未来</div>
         </div>
     </div>
 
     <!-- 核心主题 -->
-    <div style="text-align: center; margin-bottom: 25px; padding: 18px; background: #f8f9fa; border-radius: 12px;">
-        <div style="font-size: 1.3em; color: #333; font-weight: bold;">{overview}</div>
+    <div style="text-align: center; margin-bottom: 25px; padding: 15px;">
+        <div style="font-size: 1.2em; color: #e67e22; font-weight: bold;">✨ {overview} ✨</div>
     </div>
 
     <!-- 关系分析 -->
-    <div style="margin-bottom: 20px; padding: 18px; background: #fff; border-radius: 10px; border: 1px solid #ddd;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 10px; font-size: 1.1em;">关系分析</div>
-        <div style="color: #555; margin-bottom: 8px;">{rel_narrative}</div>
-        <div style="color: #444; line-height: 1.7;">{rel_analysis}</div>
+    <div style="margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #333;">
+        <div style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔮 关系分析</div>
+        <div style="color: #888; margin-bottom: 8px;">{rel_narrative}</div>
+        <div style="color: #aaa; line-height: 1.7;">{rel_analysis}</div>
     </div>
 
     <!-- 能量流向 -->
-    <div style="margin-bottom: 20px; padding: 18px; background: #fff; border-radius: 10px; border: 1px solid #ddd;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 12px; font-size: 1.1em;">能量流向分析</div>
-        <div style="line-height: 2; color: #444; font-size: 0.95em;">{energy_flow}</div>
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; color: #555; font-size: 0.9em;">{flow_summary}</div>
+    <div style="margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #333;">
+        <div style="font-weight: bold; color: #c678dd; margin-bottom: 12px;">⚡ 能量流向分析</div>
+        <div style="line-height: 2; color: #aaa; font-size: 0.9em; white-space: pre-line;">{energy_flow}</div>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #333; color: #888; font-size: 0.85em;">{flow_summary}</div>
     </div>
 
     <!-- 三牌综合解读 -->
-    <div style="margin-bottom: 20px; padding: 20px; background: #fff; border-radius: 10px; border: 1px solid #ddd;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 15px; font-size: 1.1em;">三牌综合解读</div>
-        <div style="line-height: 2; color: #333; font-size: 0.95em; white-space: pre-line;">{comprehensive_text}</div>
+    <div style="margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #333;">
+        <div style="font-weight: bold; color: #2980b9; margin-bottom: 15px;">📖 三牌综合解读</div>
+        <div style="line-height: 1.9; color: #bbb; font-size: 0.9em; white-space: pre-line;">{comprehensive_text}</div>
     </div>
 
     <!-- 维度分析 -->
-    <div style="margin-bottom: 20px; padding: 18px; background: #fff; border-radius: 10px; border: 1px solid #ddd;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 12px; font-size: 1.1em;">维度分析</div>
-        <div style="line-height: 2; color: #444; font-size: 0.9em; white-space: pre-line;">{dimensions}</div>
+    <div style="margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #333;">
+        <div style="font-weight: bold; color: #43e97b; margin-bottom: 12px;">🎯 维度分析</div>
+        <div style="line-height: 2; color: #aaa; font-size: 0.85em; white-space: pre-line;">{dimensions}</div>
     </div>
 
     <!-- 行动指南 -->
-    <div style="margin-bottom: 20px; padding: 18px; background: #fff; border-radius: 10px; border: 1px solid #ddd;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 12px; font-size: 1.1em;">行动指南</div>
-        <div style="line-height: 2; color: #444; font-size: 0.9em; white-space: pre-line;">{actions}</div>
+    <div style="margin-bottom: 20px; padding: 15px 0; border-bottom: 1px solid #333;">
+        <div style="font-weight: bold; color: #e67e22; margin-bottom: 12px;">💡 行动指南</div>
+        <div style="line-height: 2; color: #aaa; font-size: 0.85em; white-space: pre-line;">{actions}</div>
     </div>
 
     <!-- 金句 -->
-    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-        <div style="font-size: 1.05em; color: #333; font-style: italic;">"{cards[2]['goldSentence']}"</div>
+    <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 1em; color: #888; font-style: italic;">"{cards[2]['goldSentence']}"</div>
     </div>
 
 </div>"""
