@@ -999,9 +999,9 @@ ${cardsInfo}
             .then(res => res.json())
             .then(data => {
                 resultDiv.innerHTML = `
-                    <div style="padding:20px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:0 auto;">
-                        <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:12px; text-align:center;">✨ AI深度解读</div>
-                        <div style="font-size:12px; line-height:2; color:rgba(255,255,255,0.9); white-space:pre-wrap; text-align:left;">${data.reply || '小七暂时无法回应，请稍后再试。'}</div>
+                    <div style="padding:18px; background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(139,92,246,0.1)); border-radius:16px; border:1px solid rgba(67,233,123,0.2); max-width:630px; margin:0 auto;">
+                        <div style="font-size:14px; font-weight:600; color:#43e97b; margin-bottom:10px; text-align:center;">✨ AI深度解读</div>
+                        <div style="font-size:12px; line-height:1.6; color:rgba(255,255,255,0.9); white-space:pre-wrap; text-align:left;">${(data.reply || '小七暂时无法回应，请稍后再试。').replace(/\n\n+/g, '\n').trim()}</div>
                     </div>
                 `;
             })
