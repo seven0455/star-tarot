@@ -6,8 +6,9 @@ import re
 import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+import os
 PORT = 8086
-DIR = r"C:\.openclaw\workspace\pet\star-tarot"
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 def generate_three_card_reading(message):
     """生成三牌阵的AI深度解读"""
