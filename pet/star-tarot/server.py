@@ -16,20 +16,34 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 from tarot_db import TAROT_DB
 
 def find_card_by_name(name):
-    """根据牌名在数据库中查找塔罗牌"""
+    """"根据牌名在数据库中查找塔罗牌"""
     # 清理牌名（去除emoji等）
     name_clean = name.strip()
     
-    # 直接匹配
-    for card_id, card_data in TAROT_DB.items():
-        if card_data['name'].startswith(name_clean) or name_clean in card_data['name']:
-            return card_id, card_data
+    # 移除可能的序号前缀（如"1." 或 "第1张"）
+    name_clean = re.sub(r'^[第\d]+[张号个]?', '', name_clean).strip()
     
-    # 模糊匹配（只看中文名或关键词）
+    # 尝试直接匹配（去掉英文部分后匹配中文名）
     for card_id, card_data in TAROT_DB.items():
-        # 检查是否包含中文名的一部分
+        card_name = card_data['name']
+        # 提取中文名（去掉英文括号部分）
+        chinese_name = re.sub(r'\s*\(.*\)', '', card_name)
+        
+        if chinese_name in name_clean or name_clean in chinese_name:
+            return card_id, card_data
+        
+        # 也尝试关键词匹配
         for keyword in card_data['keywords']:
-            if keyword in name_clean:
+            if keyword in name_clean and len(keyword) >= 2:
+                return card_id, card_data
+    
+    # 最后尝试部分匹配（只取前2个字）
+    if len(name_clean) >= 2:
+        short_name = name_clean[:2]
+        for card_id, card_data in TAROT_DB.items():
+            card_name = card_data['name']
+            chinese_name = re.sub(r'\s*\(.*\)', '', card_name)
+            if short_name in chinese_name:
                 return card_id, card_data
     
     return None, None
