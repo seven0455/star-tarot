@@ -90,12 +90,12 @@ def generate_three_card_comprehensive(cards):
                 <span style="font-size: 12px; color: ''' + s['color'] + '''; letter-spacing: 2px; text-transform: uppercase;">''' + s['title'] + '''</span>
                 <span style="font-size: 11px; color: ''' + text_dim + '''; margin-left: 8px;">''' + s['subtitle'] + '''</span>
             </div>
-            <div style="font-size: 13px; color: ''' + text + '''; line-height: 1.9; font-family: Georgia, serif;">''' + s['content'] + '''</div>
+            <div style="font-size: 13px; color: ''' + text + '''; line-height: 1.9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">''' + s['content'] + '''</div>
         </div>'''
 
     # ========== 完整HTML ==========
     html = '''
-<div style="display: block; width: 100%; max-width: 680px; margin: 0 auto; padding: 20px; font-family: Georgia, 'Times New Roman', serif; color: ''' + text + '''; line-height: 1.6;">
+<div style="display: block; width: 100%; max-width: 680px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: ''' + text + '''; line-height: 1.6;">
 
     <!-- 标题区 -->
     <div style="text-align: center; margin-bottom: 24px; padding: 24px; background: ''' + card_bg + '''; border-radius: 16px; border: 1px solid ''' + border + ''';">
