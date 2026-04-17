@@ -852,6 +852,18 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             return 'tarot_history_' + currentUser;
         }
         
+        function addToHistory(cards) {
+            const historyKey = getHistoryKey();
+            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            // 只保留最近10条
+            history = history.slice(0, 9);
+            history.unshift({
+                cards: cards,
+                timestamp: Date.now()
+            });
+            localStorage.setItem(historyKey, JSON.stringify(history));
+        }
+        
         function saveSpreadState() {
             const state = {
                 spreadCards: spreadCards,
@@ -859,20 +871,6 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
                 user: currentUser
             };
             localStorage.setItem(getStorageKey(), JSON.stringify(state));
-            // 保存到历史记录
-            addToHistory(spreadCards);
-        }
-        
-        function addToHistory(cards) {
-            const historyKey = getHistoryKey();
-            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-            history.unshift({
-                cards: cards,
-                timestamp: Date.now()
-            });
-            // 只保留最近20条
-            history = history.slice(0, 20);
-            localStorage.setItem(historyKey, JSON.stringify(history));
         }
         
         function loadSpreadState() {
@@ -921,11 +919,28 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             history.forEach((item, index) => {
                 const date = new Date(item.timestamp);
                 const dateStr = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                const cardNames = item.cards.map(c => c.emoji + ' ' + c.name.split(' ')[0]).join(' → ');
+                const c0 = item.cards[0], c1 = item.cards[1], c2 = item.cards[2];
                 html += `
-                    <div style="padding:12px; background:rgba(255,255,255,0.03); border-radius:10px; margin-bottom:10px; cursor:pointer;" onclick="loadHistoryItem(${index})">
-                        <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:6px;">${dateStr}</div>
-                        <div style="font-size:13px; color:rgba(255,255,255,0.8);">${cardNames}</div>
+                    <div style="padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:12px; cursor:pointer; border-left:3px solid #9d4edd;" onclick="loadHistoryItem(${index})">
+                        <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:8px;">📅 ${dateStr}</div>
+                        <div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:8px;">
+                            <div style="flex:1; text-align:center;">
+                                <div style="font-size:20px;">${c0.emoji}</div>
+                                <div style="font-size:10px; color:#a78bfa;">过去</div>
+                                <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c0.name.split(' ')[0]}</div>
+                            </div>
+                            <div style="flex:1; text-align:center;">
+                                <div style="font-size:20px;">${c1.emoji}</div>
+                                <div style="font-size:10px; color:#c678dd;">现在</div>
+                                <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c1.name.split(' ')[0]}</div>
+                            </div>
+                            <div style="flex:1; text-align:center;">
+                                <div style="font-size:20px;">${c2.emoji}</div>
+                                <div style="font-size:10px; color:#43e97b;">未来</div>
+                                <div style="font-size:11px; color:rgba(255,255,255,0.8);">${c2.name.split(' ')[0]}</div>
+                            </div>
+                        </div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.5);">点击查看完整解读</div>
                     </div>
                 `;
             });
@@ -1155,6 +1170,9 @@ ${dailyCardData.guidance ? '今日指引：' + dailyCardData.guidance.replace(/<
             
             resultDiv.innerHTML = html;
             document.getElementById('spreadResetBtn').style.display = 'block';
+            
+            // 完成抽牌后才保存到历史
+            addToHistory(spreadCards);
             
             // 保存状态到localStorage
             saveSpreadState();
