@@ -39,7 +39,7 @@ const tarotDeck = {
             reversedMeaning: '逆位的愚人可能是：太冲动或太害怕。找到自己的平衡点。'
         },
         {
-            id: 1, name: '魔术师 The Magician', emoji: '🎩',
+            id: 1, name: '魔术师 The Magician', emoji: '🪄',
             keywords: ['创造', '意志力', '技能', '显化', '行动'],
             summary: '你拥有一切所需的资源和能力，今天是行动的日子',
             coreEnergy: '将梦想转化为现实的创造力',
